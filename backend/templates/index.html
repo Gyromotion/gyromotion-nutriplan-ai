@@ -1,0 +1,2750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gyromotion NutriPlan - Personalized Indian Diet Planner</title>
+  
+  <!-- CSS imports -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- React & Babel CDNs -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Tailwind CSS v3 CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Custom React SVG Icons Component (No Lucide Script to prevent React DOM reconciliation errors) -->
+  
+  <!-- Chart.js CDN for canvas visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+              950: '#052e16',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Premium Glassmorphic utilities */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+    }
+    .dark .glass-card {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    }
+    .glass-input {
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    .glass-input:focus {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(34, 197, 94, 0.6);
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+    }
+    .dark .glass-input {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(34, 197, 94, 0.15);
+    }
+    .dark .glass-input:focus {
+      background: rgba(15, 23, 42, 0.9);
+      border-color: rgba(34, 197, 94, 0.5);
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+    
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(34, 197, 94, 0.2);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(34, 197, 94, 0.4);
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+    }
+
+    /* Water tracker liquid wave animation */
+    @keyframes wave-anim {
+      0% { transform: translate(-50%, 0) rotate(0deg); }
+      50% { transform: translate(-50%, -2px) rotate(180deg); }
+      100% { transform: translate(-50%, 0) rotate(360deg); }
+    }
+    .animate-wave {
+      animation: wave-anim 4s infinite linear;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100 antialiased font-sans">
+  <div id="root"></div>
+
+  <!-- JSX script block processed by Babel -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // SVG Icon component to avoid Lucide script DOM mutations
+    function Icon({ name, className = '', ...props }) {
+      const icons = {
+        flame: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+          </svg>
+        ),
+        'rotate-ccw': (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+        ),
+        sun: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2"/>
+            <path d="M12 20v2"/>
+            <path d="m4.93 4.93 1.41 1.41"/>
+            <path d="m17.66 17.66 1.41 1.41"/>
+            <path d="M2 12h2"/>
+            <path d="M20 12h2"/>
+            <path d="m6.34 17.66-1.41 1.41"/>
+            <path d="m19.07 4.93-1.41 1.41"/>
+          </svg>
+        ),
+        moon: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+        ),
+        sparkles: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            <path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5z"/>
+            <path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z"/>
+          </svg>
+        ),
+        'arrow-right': (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="M5 12h14"/>
+            <path d="m12 5 7 7-7 7"/>
+          </svg>
+        ),
+        activity: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        ),
+        utensils: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+            <path d="M7 2v20"/>
+            <path d="M21 15V2v0a5 5 0 0 0-5 5v8c0 1.1.9 2 2 2h3Z"/>
+            <path d="M18 17v5"/>
+          </svg>
+        ),
+        scale: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="m16 16 3-8 3 8c-.87.65-2.24 1-3 1s-2.13-.35-3-1Z"/>
+            <path d="m2 16 3-8 3 8c-.87.65-2.24 1-3 1s-2.13-.35-3-1Z"/>
+            <path d="M7 21h10"/>
+            <path d="M12 3v18"/>
+            <path d="M3 7h18"/>
+          </svg>
+        ),
+        dumbbell: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="m6.5 6.5 11 11"/>
+            <path d="m21 21-1-1"/>
+            <path d="m3 3 1 1"/>
+            <path d="m18 22 4-4a2 2 0 0 0 0-2.83l-3.17-3.17a2 2 0 0 0-2.83 0l-4 4a2 2 0 0 0 0 2.83l3.17 3.17a2 2 0 0 0 2.83 0Z"/>
+            <path d="m6 10-4-4a2 2 0 0 1 0-2.83l3.17-3.17a2 2 0 0 1 2.83 0l4 4a2 2 0 0 1 0 2.83l-3.17 3.17a2 2 0 0 1-2.83 0Z"/>
+          </svg>
+        ),
+        search: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+        ),
+        'refresh-cw': (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+            <path d="M16 16h5v5"/>
+          </svg>
+        ),
+        user: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        ),
+        'file-text': (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+            <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+            <path d="M10 9H8"/>
+            <path d="M16 13H8"/>
+            <path d="M16 17H8"/>
+          </svg>
+        ),
+        droplet: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="M12 22a7 7 0 0 0 7-7c0-4.3-7-11-7-11S5 10.7 5 15a7 7 0 0 0 7 7z"/>
+          </svg>
+        ),
+        send: (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="m22 2-7 20-4-9-9-4Z"/>
+            <path d="M22 2 11 13"/>
+          </svg>
+        ),
+        'chevron-right': (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        ),
+        'chevron-down': (
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        )
+      };
+      return icons[name] || null;
+    }
+
+    function FoodTypeBadge({ isVeg }) {
+      const colorClass = isVeg ? 'border-green-600 text-green-600' : 'border-red-700 text-red-700';
+      const dotColorClass = isVeg ? 'bg-green-600' : 'bg-red-700';
+      return (
+        <div className={`w-4 h-4 border-2 flex items-center justify-center p-0.5 rounded-sm shrink-0 ${colorClass}`} title={isVeg ? "Vegetarian" : "Non-Vegetarian"}>
+          <div className={`w-1.5 h-1.5 rounded-full ${dotColorClass}`} />
+        </div>
+      );
+    }
+
+    function WaterGlass({ filled, time, onClick }) {
+      return (
+        <button onClick={onClick} className="flex flex-col items-center group relative outline-none focus:outline-none">
+          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 mb-1.5 group-hover:text-blue-500 transition-colors">{time}</span>
+          <div className="relative w-11 h-14 border-b-4 border-x-2 border-slate-400/80 dark:border-slate-500/80 rounded-b-xl rounded-t-sm overflow-hidden bg-slate-100/30 dark:bg-slate-800/30 shadow-inner flex items-end cursor-pointer group-hover:scale-105 transition-all duration-200">
+            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-blue-600 to-blue-400 transition-all duration-500 ease-out" style={{ height: filled ? '80%' : '0%' }}>
+              {filled && <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-[200%] h-5 bg-blue-400/30 rounded-[40%] animate-wave pointer-events-none" />}
+              {filled && <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-[220%] h-5 bg-blue-300/40 rounded-[35%] animate-wave pointer-events-none" style={{ animationDuration: '6s', animationDelay: '-2s' }} />}
+            </div>
+            <div className="absolute top-1 left-1.5 w-0.5 h-10 bg-white/20 rounded-full pointer-events-none" />
+            <div className="absolute bottom-1 right-1.5 w-1 h-1 bg-white/30 rounded-full pointer-events-none" />
+          </div>
+          <span className={`text-[9px] font-extrabold mt-1.5 px-1.5 py-0.5 rounded-full transition-all duration-200 ${filled ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-650'}`}>{filled ? '✓' : '250ml'}</span>
+        </button>
+      );
+    }
+
+    // Helper to divide waking hours into water intervals
+    const getWaterTime = (index, totalCups) => {
+      if (totalCups <= 1) return "08:00 AM";
+      const startHour = 8; // 8:00 AM
+      const endHour = 22;  // 10:00 PM
+      const totalMinutes = (endHour - startHour) * 60;
+      const minutesPerCup = totalMinutes / (totalCups - 1);
+      const cupTimeMinutes = startHour * 60 + index * minutesPerCup;
+      
+      let hours = Math.floor(cupTimeMinutes / 60);
+      const minutes = Math.round(cupTimeMinutes % 60);
+      
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const strMinutes = minutes < 10 ? '0' + minutes : minutes;
+      const strHours = hours < 10 ? '0' + hours : hours;
+      
+      return `${strHours}:${strMinutes} ${ampm}`;
+    };
+
+    function App() {
+      const [darkMode, setDarkMode] = useState(false);
+      const [step, setStep] = useState(1);
+      const [validationError, setValidationError] = useState('');
+      const [showServingSizes, setShowServingSizes] = useState(false);
+      const [showCaseHistory, setShowCaseHistory] = useState(false);
+      const [activeDay, setActiveDay] = useState('Monday');
+      const [medicalDropdownOpen, setMedicalDropdownOpen] = useState(false);
+
+      // Default user example empty with placeholders
+      const [formData, setFormData] = useState({
+        name: '',
+        age: '',
+        gender: 'male',
+        address: '',
+        contactNo: '',
+        maritalStatus: 'single',
+        occupation: '',
+        sleepSchedule: '',
+        workSchedule: '',
+        addictions: '',
+        dailyWaterIntake: '',
+        height: '',
+        weight: '',
+        surgicalHistory: '',
+        medicalHistory: '',
+        physiologicalCondition: 'none',
+        hormonalDisturbance: '',
+        injuryHistory: 'none',
+        allergies: '',
+        nutritionalDeficiency: 'not_known',
+        goal: 'weight_loss',
+        expectedOutcome: '',
+        resultsExpectedBy: '',
+        dietType: 'vegetarian',
+        religiousPreference: 'none',
+        eatingCustoms: '',
+        exerciseSchedule: '',
+        equipment: 'bodyweight',
+        activeMeals: ['breakfast', 'mid_morning_snack', 'lunch', 'evening_snack', 'dinner'],
+        activityLevel: 'light',
+        injuryType: 'none'
+      });
+
+      // Keep legacy fields in sync for calculators compatibility
+      useEffect(() => {
+        setFormData(prev => ({
+          ...prev,
+          injuryType: prev.injuryHistory,
+          activityLevel: prev.goal.includes('gain') || prev.goal.includes('sports') || prev.goal.includes('muscle') ? 'moderate' : 'light'
+        }));
+      }, [formData.injuryHistory, formData.goal]);
+
+      const [loading, setLoading] = useState(false);
+      const [dietPlan, setDietPlan] = useState(null);
+      const [dietViewMode, setDietViewMode] = useState('daily'); // 'daily' or 'monthly'
+      const [selectedCalendarDay, setSelectedCalendarDay] = useState(1);
+      const [weightProj, setWeightProj] = useState([]);
+      const [bmiData, setBmiData] = useState(null);
+      const [bmrData, setBmrData] = useState(null);
+
+      // Water Tracker
+      const [waterCups, setWaterCups] = useState(0);
+      const [waterGoalCups, setWaterGoalCups] = useState(10);
+
+      // Food DB Search
+      const [foodSearch, setFoodSearch] = useState('');
+      const [foodCategory, setFoodCategory] = useState('');
+      const [foodsList, setFoodsList] = useState([]);
+      const [searchingFoods, setSearchingFoods] = useState(false);
+
+      // Chatbot
+      const [chatOpen, setChatOpen] = useState(false);
+      const [chatInput, setChatInput] = useState('');
+      const [chatMessages, setChatMessages] = useState([
+        { sender: 'bot', text: 'Hi! I am your Gyromotion nutritionist. How can I help you customize your Indian diet plan today?' }
+      ]);
+      const [chatLoading, setChatLoading] = useState(false);
+      
+      const chatEndRef = useRef(null);
+      const weightChartRef = useRef(null);
+      const macroChartRef = useRef(null);
+      const calorieChartRef = useRef(null);
+      
+      // Chart instances
+      const weightChartInst = useRef(null);
+      const macroChartInst = useRef(null);
+      const calorieChartInst = useRef(null);
+      const hasRenderedRef = useRef(false);
+
+      // Theme toggle
+      useEffect(() => {
+        if (darkMode) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }, [darkMode]);
+
+      // Scroll chatbot
+      useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, [chatMessages, chatOpen]);
+
+      // Food Search on start/change
+      useEffect(() => {
+        fetchFoods();
+      }, [foodCategory]);
+
+      const fetchFoods = async () => {
+        setSearchingFoods(true);
+        try {
+          const res = await fetch(`/api/foods?q=${encodeURIComponent(foodSearch)}&category=${encodeURIComponent(foodCategory)}`);
+          const data = await res.json();
+          if (data.success) {
+            setFoodsList(data.data);
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setSearchingFoods(false);
+        }
+      };
+
+      const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        fetchFoods();
+      };
+
+      const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+          ...prev,
+          [name]: name === 'weight' || name === 'height' || name === 'age' || name === 'dailyWaterIntake' ? parseFloat(value) || '' : value
+        }));
+      };
+
+      const handleMealCheckboxChange = (mealKey) => {
+        setFormData(prev => {
+          const active = prev.activeMeals.includes(mealKey)
+            ? prev.activeMeals.filter(m => m !== mealKey)
+            : [...prev.activeMeals, mealKey];
+          return { ...prev, activeMeals: active };
+        });
+      };
+
+      const handleDeficiencyToggle = (defKey) => {
+        setFormData(prev => {
+          let current = prev.nutritionalDeficiency || '';
+          let list = [];
+          if (current && current !== 'none' && current !== 'not_known') {
+            list = current.split(',').map(x => x.trim()).filter(Boolean);
+          }
+          if (defKey === 'none' || defKey === 'not_known') {
+            return { ...prev, nutritionalDeficiency: defKey };
+          }
+          list = list.filter(x => x !== 'none' && x !== 'not_known');
+          if (list.includes(defKey)) {
+            list = list.filter(x => x !== defKey);
+          } else {
+            list.push(defKey);
+          }
+          const newStr = list.length > 0 ? list.join(',') : 'none';
+          return { ...prev, nutritionalDeficiency: newStr };
+        });
+      };
+
+      const validateStep = () => {
+        if (step === 1) {
+          if (!formData.name.trim()) return "Please enter your name.";
+          if (!formData.age) return "Please enter your age.";
+          const ageNum = parseInt(formData.age);
+          if (ageNum < 1 || ageNum > 120) return "Age must be between 1 and 120.";
+          if (!formData.contactNo.trim()) return "Please enter your contact number.";
+          if (!/^\+?[0-9\- ]{8,15}$/.test(formData.contactNo.trim())) return "Please enter a valid contact number (8-15 digits).";
+          if (!formData.address.trim()) return "Please enter your address/region.";
+        }
+        if (step === 2) {
+          if (!formData.occupation.trim()) return "Please enter your occupation.";
+          if (formData.dailyWaterIntake === '') return "Please enter your current daily water intake.";
+          const waterNum = parseFloat(formData.dailyWaterIntake);
+          if (waterNum < 0 || waterNum > 10) return "Water intake must be between 0 and 10 Liters.";
+        }
+        if (step === 3) {
+          if (!formData.height) return "Please enter your height.";
+          const hNum = parseFloat(formData.height);
+          if (hNum < 50 || hNum > 250) return "Height must be between 50 and 250 cm.";
+          if (!formData.weight) return "Please enter your weight.";
+          const wNum = parseFloat(formData.weight);
+          if (wNum < 10 || wNum > 300) return "Weight must be between 10 and 300 kg.";
+        }
+        if (step === 4) {
+          if (formData.activeMeals.length === 0) return "Please select at least one active meal.";
+        }
+        return "";
+      };
+
+      const handleNext = () => {
+        const error = validateStep();
+        if (error) {
+          setValidationError(error);
+        } else {
+          setValidationError('');
+          setStep(prev => prev + 1);
+        }
+      };
+
+      const handleBack = () => {
+        setValidationError('');
+        setStep(prev => prev - 1);
+      };
+
+      const generatePlan = async (e) => {
+        if (e) e.preventDefault();
+        if (step < 4) {
+          handleNext();
+          return;
+        }
+        setLoading(true);
+        try {
+          // Calculate BMI
+          let res = await fetch('/api/calculate-bmi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ weight: formData.weight, height: formData.height })
+          });
+          const bmiRes = await res.json();
+          setBmiData(bmiRes.data);
+
+          // Calculate BMR & TDEE
+          res = await fetch('/api/calculate-bmr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              age: formData.age,
+              gender: formData.gender,
+              weight: formData.weight,
+              height: formData.height,
+              activity_level: formData.activityLevel
+            })
+          });
+          const bmrRes = await res.json();
+          setBmrData(bmrRes.data);
+
+          // Weight projection
+          res = await fetch('/api/predict-weight', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ weight: formData.weight, goal: formData.goal })
+          });
+          const weightRes = await res.json();
+          setWeightProj(weightRes.data.projection);
+
+          // Generate Plan
+          res = await fetch('/api/generate-diet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              age: formData.age,
+              gender: formData.gender,
+              weight: formData.weight,
+              height: formData.height,
+              activity_level: formData.activityLevel,
+              goal: formData.goal,
+              food_preference: formData.dietType,
+              injury_type: formData.injuryType,
+              active_meals: formData.activeMeals,
+              physiological_condition: formData.physiologicalCondition,
+              equipment: formData.equipment,
+              medical_history: formData.medicalHistory,
+              surgical_history: formData.surgicalHistory,
+              hormonal_disturbance: formData.hormonalDisturbance
+            })
+          });
+          const dietRes = await res.json();
+          setDietPlan(dietRes.data);
+
+          // Water cups
+          setWaterGoalCups(Math.round((formData.weight * 35) / 250));
+          setWaterCups(0);
+
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setTimeout(() => {
+            setLoading(false);
+          }, 800);
+        }
+      };
+
+            const handleSwap = async (mealKey, index, currentItemName, targetCalories, dayIndex = 0) => {
+        try {
+          const res = await fetch('/api/meal-swap', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              category: mealKey,
+              name: currentItemName,
+              target_calories: targetCalories,
+              food_preference: formData.dietType
+            })
+          });
+          const result = await res.json();
+          if (result.success) {
+            const swappedItem = result.data;
+            setDietPlan(prevPlan => {
+              const updatedPlan = { ...prevPlan };
+              if (!updatedPlan.thirty_day_plan || !updatedPlan.thirty_day_plan[dayIndex]) return prevPlan;
+
+              const dayEntry = { ...updatedPlan.thirty_day_plan[dayIndex] };
+              
+              // 1. Update the items inside dayEntry.meals
+              const updatedMeals = dayEntry.meals.map(m => {
+                if (m.key === mealKey) {
+                  const newItems = [...m.items];
+                  const targetIdx = index !== null && index !== undefined ? index : 0;
+                  newItems[targetIdx] = swappedItem;
+                  
+                  return {
+                    ...m,
+                    items: newItems,
+                    calories: newItems.reduce((acc, item) => acc + item.calories, 0),
+                    protein: parseFloat(newItems.reduce((acc, item) => acc + item.protein, 0).toFixed(1)),
+                    carbs: parseFloat(newItems.reduce((acc, item) => acc + item.carbs, 0).toFixed(1)),
+                    fats: parseFloat(newItems.reduce((acc, item) => acc + item.fats, 0).toFixed(1))
+                  };
+                }
+                return m;
+              });
+              
+              dayEntry.meals = updatedMeals;
+              
+              // 2. Recompute day totals
+              const actualCalories = updatedMeals.reduce((acc, m) => acc + m.calories, 0);
+              const actualProtein = parseFloat(updatedMeals.reduce((acc, m) => acc + m.protein, 0).toFixed(1));
+              const actualCarbs = parseFloat(updatedMeals.reduce((acc, m) => acc + m.carbs, 0).toFixed(1));
+              const actualFats = parseFloat(updatedMeals.reduce((acc, m) => acc + m.fats, 0).toFixed(1));
+              
+              const saladCal = updatedPlan.salad ? updatedPlan.salad.calories : 59;
+              const saladProt = updatedPlan.salad ? updatedPlan.salad.protein : 2.0;
+              const saladCarbs = updatedPlan.salad ? updatedPlan.salad.carbs : 13.6;
+              const saladFats = updatedPlan.salad ? updatedPlan.salad.fats : 0.4;
+
+              dayEntry.totals = {
+                calories: actualCalories + saladCal,
+                protein: parseFloat((actualProtein + saladProt).toFixed(1)),
+                carbs: parseFloat((actualCarbs + saladCarbs).toFixed(1)),
+                fats: parseFloat((actualFats + saladFats).toFixed(1))
+              };
+              
+              // 3. Put updated day entry back
+              updatedPlan.thirty_day_plan[dayIndex] = dayEntry;
+              
+              // 4. Update legacy meal_plan for compatibility if updating Day 1 (dayIndex === 0)
+              if (dayIndex === 0) {
+                const matchedMeal = updatedMeals.find(m => m.key === mealKey);
+                if (matchedMeal) {
+                  if (mealKey === 'lunch' || mealKey === 'dinner') {
+                    updatedPlan.meal_plan[mealKey] = matchedMeal;
+                  } else {
+                    const firstItem = matchedMeal.items[0] || {};
+                    updatedPlan.meal_plan[mealKey] = {
+                      name: firstItem.name,
+                      calories: matchedMeal.calories,
+                      protein: matchedMeal.protein,
+                      carbs: matchedMeal.carbs,
+                      fats: matchedMeal.fats,
+                      serving_size: firstItem.serving_size,
+                      is_veg: firstItem.is_veg,
+                      vitamins: firstItem.vitamins,
+                      amino_acids: firstItem.amino_acids
+                    };
+                  }
+                }
+                updatedPlan.meal_plan.meals = updatedMeals;
+                updatedPlan.totals = dayEntry.totals;
+                
+                // Recompute ghee advisory for Day 1
+                const fatCalories = dayEntry.totals.fats * 9;
+                const fatRatio = fatCalories / Math.max(1, dayEntry.totals.calories);
+                let gheeAdvisory = null;
+                if (fatRatio < 0.20) {
+                  const targetCalories = updatedPlan.target_calories;
+                  if (targetCalories < 1600) {
+                    gheeAdvisory = `Your diet plan's fat ratio is ${(fatRatio*100).toFixed(1)}% (less than the recommended 20%). We suggest adding 1 tsp of Ghee (45 kcal, 5g fat) to your Lunch or Dinner to support fat-soluble vitamin absorption.`;
+                  } else {
+                    gheeAdvisory = `Your diet plan's fat ratio is ${(fatRatio*100).toFixed(1)}% (less than the recommended 20%). We suggest adding 2 tsp of Ghee (90 kcal, 10g fat) to your Lunch or Dinner to support fat-soluble vitamin absorption.`;
+                  }
+                }
+                updatedPlan.ghee_advisory = gheeAdvisory;
+              }
+              
+              return updatedPlan;
+            });
+          }
+        } catch (e) {
+          console.error("Failed to swap meal:", e);
+        }
+      };
+
+      const handleChatSubmit = async (e) => {
+        e.preventDefault();
+        if (!chatInput.trim()) return;
+        const msg = chatInput;
+        setChatMessages(prev => [...prev, { sender: 'user', text: msg }]);
+        setChatInput('');
+        setChatLoading(true);
+
+        try {
+          const res = await fetch('/api/chatbot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg })
+          });
+          const data = await res.json();
+          if (data.success) {
+            setChatMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setChatLoading(false);
+        }
+      };
+
+      // Render Chart.js graphs inside useEffect when dietPlan/weightProj is generated
+      useEffect(() => {
+        if (!dietPlan || !weightProj.length || loading) {
+          hasRenderedRef.current = false;
+          return;
+        }
+
+        const delay = hasRenderedRef.current ? 50 : 600;
+        const timer = setTimeout(() => {
+          if (!weightChartRef.current || !macroChartRef.current || !calorieChartRef.current) return;
+
+          hasRenderedRef.current = true;
+          // Destroy previous chart instances
+          if (weightChartInst.current) weightChartInst.current.destroy();
+          if (macroChartInst.current) macroChartInst.current.destroy();
+          if (calorieChartInst.current) calorieChartInst.current.destroy();
+
+          const ctxWeight = weightChartRef.current.getContext('2d');
+          const ctxMacro = macroChartRef.current.getContext('2d');
+          const ctxCalorie = calorieChartRef.current.getContext('2d');
+
+          // Dynamic theme-aware colors
+          const textColor = darkMode ? '#94a3b8' : '#475569';
+          const gridColor = darkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+          
+          Chart.defaults.color = textColor;
+
+          // 1. Weight Projection Chart
+          weightChartInst.current = new Chart(ctxWeight, {
+            type: 'line',
+            data: {
+              labels: weightProj.map(d => d.week),
+              datasets: [{
+                label: 'Projected Weight (kg)',
+                data: weightProj.map(d => d.weight),
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { 
+                legend: { display: false }
+              },
+              scales: {
+                y: { 
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                },
+                x: { 
+                  grid: { display: false },
+                  ticks: { color: textColor }
+                }
+              }
+            }
+          });
+
+          // 2. Macro Energy Split
+          macroChartInst.current = new Chart(ctxMacro, {
+            type: 'doughnut',
+            data: {
+              labels: ['Protein', 'Carbohydrates', 'Fats'],
+              datasets: [{
+                data: [
+                  dietPlan.totals.protein * 4,
+                  dietPlan.totals.carbs * 4,
+                  dietPlan.totals.fats * 9
+                ],
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 0
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { 
+                  position: 'bottom', 
+                  labels: { boxWidth: 12, color: textColor } 
+                }
+              }
+            }
+          });
+
+          // 3. Target vs Actual Calories
+          calorieChartInst.current = new Chart(ctxCalorie, {
+            type: 'bar',
+            data: {
+              labels: ['Calorie Target', 'Meal Plan Calories'],
+              datasets: [{
+                data: [dietPlan.target_calories, dietPlan.totals.calories],
+                backgroundColor: ['#f43f5e', '#10b981'],
+                borderRadius: 8,
+                barThickness: 35
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { 
+                legend: { display: false }
+              },
+              scales: {
+                y: { 
+                  grid: { color: gridColor },
+                  ticks: { color: textColor }
+                },
+                x: { 
+                  grid: { display: false },
+                  ticks: { color: textColor }
+                }
+              }
+            }
+          });
+        }, delay);
+
+        return () => clearTimeout(timer);
+      }, [dietPlan, weightProj, darkMode, loading]);
+
+      return (
+        <div className="min-h-screen">
+          
+          {/* TOP NAVBAR */}
+          <nav className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-800/50 h-16 flex items-center justify-between px-6 sm:px-12 no-print">
+            <div className="flex items-center space-x-2">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+                <Icon name="flame" className="w-5 h-5 animate-pulse" />
+              </div>
+              <span className="font-display font-extrabold text-xl tracking-tight text-slate-800 dark:text-white">
+                Gyromotion <span className="bg-gradient-to-r from-emerald-500 to-green-600 bg-clip-text text-transparent">NutriPlan</span>
+              </span>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              {dietPlan && (
+                <button 
+                  onClick={() => setDietPlan(null)}
+                  className="hidden md:flex items-center space-x-1 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 py-2 px-3 rounded-xl transition-all"
+                >
+                  <Icon name="rotate-ccw" className="w-4 h-4 mr-1" />
+                  Reset Calculator
+                </button>
+              )}
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="p-2.5 rounded-xl border border-slate-200/60 dark:border-slate-800 bg-white/85 dark:bg-slate-900 shadow-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all duration-200"
+              >
+                {darkMode ? <Icon name="sun" className="w-[18px] h-[18px]" /> : <Icon name="moon" className="w-[18px] h-[18px]" />}
+              </button>
+            </div>
+          </nav>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+            
+            {/* HERO & CALCULATOR */}
+            {!dietPlan && !loading && (
+              <div className="space-y-16 animate-fade-in-up">
+                
+                {/* Hero section */}
+                <div className="text-center max-w-3xl mx-auto space-y-6">
+                  <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-100/80 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold tracking-wide">
+                    <Icon name="sparkles" className="w-3 h-3 text-emerald-500 animate-spin" />
+                    <span>100% Free - No Sign Up Required</span>
+                  </div>
+                  <h1 className="font-display font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+                    Personalized Indian Diet Planner <br />
+                    <span className="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 bg-clip-text text-transparent">
+                      Powered by Gyromotion
+                    </span>
+                  </h1>
+                  <p className="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                    Smart meal plans, calorie tracking, and nutrition guidance tailored to your body, activity metrics, and vegetarian preferences.
+                  </p>
+                  
+                  <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="#calculator" className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-emerald-500/20 active:scale-98 transition-all duration-300">
+                      Build Diet Plan <Icon name="arrow-right" className="ml-2 w-4 h-4" />
+                    </a>
+                    <a href="#foods-database" className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold rounded-xl transition-all duration-200">
+                      Explore Foods
+                    </a>
+                  </div>
+                </div>
+
+                {/* Grid info */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                  <div className="glass-card p-6 rounded-2xl border border-slate-200/50 hover:translate-y-[-4px] transition-all duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
+                      <Icon name="activity" className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white mb-2">Smart Calculators</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Instant calculations of your BMI, BMR, daily calories, water, and macro targets.</p>
+                  </div>
+                  <div className="glass-card p-6 rounded-2xl border border-slate-200/50 hover:translate-y-[-4px] transition-all duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-4">
+                      <Icon name="utensils" className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white mb-2">Indian Meal Suggestions</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Beautiful selection of Gujarati, Punjabi, Jain, and South Indian meals, mapped dynamically.</p>
+                  </div>
+                  <div className="glass-card p-6 rounded-2xl border border-slate-200/50 hover:translate-y-[-4px] transition-all duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
+                      <Icon name="scale" className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white mb-2">Weight Deficit Charts</h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">Track 3-month weight prediction curves based on scientific metabolic variables.</p>
+                  </div>
+                </div>
+
+                {/* Form calculator */}
+                <div id="calculator" className="max-w-3xl mx-auto glass-card rounded-3xl p-6 sm:p-10 border border-slate-200/60 dark:border-slate-800/40 shadow-xl scroll-mt-24">
+                  
+                  {/* STEP INDICATORS */}
+                  <div className="flex justify-between items-center mb-8 max-w-md mx-auto no-print">
+                    {[
+                      { stepNum: 1, label: 'Identity' },
+                      { stepNum: 2, label: 'Routine' },
+                      { stepNum: 3, label: 'Medical' },
+                      { stepNum: 4, label: 'Goals' }
+                    ].map((s) => (
+                      <div key={s.stepNum} className="flex flex-col items-center flex-1 relative">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 ${
+                          step === s.stepNum
+                            ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20 scale-110'
+                            : step > s.stepNum
+                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-450 dark:text-slate-500'
+                        }`}>
+                          {step > s.stepNum ? '✓' : s.stepNum}
+                        </div>
+                        <span className={`text-[10px] font-bold mt-1.5 uppercase tracking-wider ${
+                          step === s.stepNum ? 'text-emerald-500' : 'text-slate-400 dark:text-slate-500'
+                        }`}>
+                          {s.label}
+                        </span>
+                        {s.stepNum < 4 && (
+                          <div className={`hidden sm:block absolute top-4 left-[calc(50%+1.5rem)] right-[calc(-50%+1.5rem)] h-[2px] -z-10 ${
+                            step > s.stepNum ? 'bg-emerald-500' : 'bg-slate-100 dark:bg-slate-800'
+                          }`} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* VALIDATION ERROR ALERTS */}
+                  {validationError && (
+                    <div className="p-3.5 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 rounded-xl text-rose-600 dark:text-rose-450 text-xs font-semibold mb-6 flex items-center space-x-2 animate-pulse no-print">
+                      <span>⚠️</span>
+                      <span>{validationError}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={generatePlan} className="space-y-6">
+                    
+                    {/* STEP 1: IDENTITY */}
+                    {step === 1 && (
+                      <div className="space-y-6 animate-fade-in-up">
+                        <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white border-b border-slate-200/40 dark:border-slate-800/40 pb-2">Step 1: Patient Identity & Profile</h3>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Patient Name</label>
+                            <input 
+                              type="text" 
+                              name="name" 
+                              value={formData.name}
+                              onChange={handleInputChange}
+                              placeholder="e.g. John Doe"
+                              required
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Age (years)</label>
+                            <input 
+                              type="number" 
+                              name="age" 
+                              value={formData.age}
+                              onChange={handleInputChange}
+                              min="1" 
+                              max="120" 
+                              placeholder="e.g. 25"
+                              required
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Gender</label>
+                            <select 
+                              name="gender" 
+                              value={formData.gender}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium"
+                            >
+                              <option value="male">Male</option>
+                              <option value="female">Female</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Marital Status</label>
+                            <select 
+                              name="maritalStatus" 
+                              value={formData.maritalStatus}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium"
+                            >
+                              <option value="single">Single</option>
+                              <option value="married">Married</option>
+                              <option value="divorced">Divorced</option>
+                              <option value="widowed">Widowed</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Contact Number</label>
+                            <input 
+                              type="text" 
+                              name="contactNo" 
+                              value={formData.contactNo}
+                              onChange={handleInputChange}
+                              placeholder="e.g. 9876543210"
+                              required
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Address/Region (for regional food availability)</label>
+                            <input 
+                              type="text" 
+                              name="address" 
+                              value={formData.address}
+                              onChange={handleInputChange}
+                              placeholder="e.g. Gujarat, Punjab, South India"
+                              required
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STEP 2: ROUTINE */}
+                    {step === 2 && (
+                      <div className="space-y-6 animate-fade-in-up">
+                        <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white border-b border-slate-200/40 dark:border-slate-800/40 pb-2">Step 2: Occupation, Habits & Routine</h3>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Occupation</label>
+                            <input 
+                              type="text" 
+                              name="occupation" 
+                              value={formData.occupation}
+                              onChange={handleInputChange}
+                              placeholder="e.g. Software Engineer, Homemaker"
+                              required
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Daily Water Intake Target (Liters)</label>
+                            <input 
+                              type="number" 
+                              name="dailyWaterIntake" 
+                              value={formData.dailyWaterIntake}
+                              onChange={handleInputChange}
+                              min="0" 
+                              max="10" 
+                              step="0.1"
+                              placeholder="e.g. 2.5"
+                              required
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Sleep Schedule</label>
+                            <input 
+                              type="text" 
+                              name="sleepSchedule" 
+                              value={formData.sleepSchedule}
+                              onChange={handleInputChange}
+                              placeholder="e.g. 10:30 PM - 6:30 AM"
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Work Schedule</label>
+                            <input 
+                              type="text" 
+                              name="workSchedule" 
+                              value={formData.workSchedule}
+                              onChange={handleInputChange}
+                              placeholder="e.g. 9:00 AM - 6:00 PM"
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Addictions / Daily Habits</label>
+                          <input 
+                            type="text" 
+                            name="addictions" 
+                            value={formData.addictions}
+                            onChange={handleInputChange}
+                            placeholder="e.g. Tea twice daily, alcohol on weekends, none"
+                            className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STEP 3: MEDICAL */}
+                    {step === 3 && (
+                      <div className="space-y-6 animate-fade-in-up">
+                        <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white border-b border-slate-200/40 dark:border-slate-800/40 pb-2">Step 3: Medical Profile & Conditions</h3>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Height (cm)</label>
+                            <input 
+                              type="number" 
+                              name="height" 
+                              value={formData.height}
+                              onChange={handleInputChange}
+                              min="50" 
+                              max="250" 
+                              placeholder="e.g. 175"
+                              required
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Weight (kg)</label>
+                            <input 
+                              type="number" 
+                              name="weight" 
+                              value={formData.weight}
+                              onChange={handleInputChange}
+                              min="10" 
+                              max="300" 
+                              placeholder="e.g. 70"
+                              required
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Special Physiological Condition</label>
+                            <select 
+                              name="physiologicalCondition" 
+                              value={formData.physiologicalCondition}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium"
+                            >
+                              <option value="none">None</option>
+                              <option value="pregnancy">Pregnancy (+350 kcal, +25g Protein)</option>
+                              <option value="lactation">Lactation (+500 kcal, +20g Protein)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Active Injury History (For Workout Safety)</label>
+                            <select 
+                              name="injuryHistory" 
+                              value={formData.injuryHistory}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium"
+                            >
+                              <option value="none">None (No active injuries)</option>
+                              <option value="acl">ACL Tear (Lower-body safety filters)</option>
+                              <option value="knee">Knee Pain (No deep bending/jumping)</option>
+                              <option value="shoulder">Shoulder Injury (No overhead press/pushups)</option>
+                              <option value="back">Back Pain (No deadlifts/spine loading)</option>
+                              <option value="bone">Bone Fracture / Recovery (High Calcium boost)</option>
+                              <option value="muscle">Muscle/Ligament Strain or Tear (High Protein boost)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Surgical History</label>
+                            <input 
+                              type="text" 
+                              name="surgicalHistory" 
+                              value={formData.surgicalHistory}
+                              onChange={handleInputChange}
+                              placeholder="e.g. Appendectomy (2022), None"
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                          <div className="relative">
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Medical History (Chronic Diseases)</label>
+                            <button
+                              type="button"
+                              onClick={() => setMedicalDropdownOpen(!medicalDropdownOpen)}
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium text-left flex justify-between items-center outline-none focus:outline-none"
+                            >
+                              <span className="truncate">
+                                {formData.medicalHistory ? formData.medicalHistory.split(',').map(x => x.trim().replace(/\b\w/g, c => c.toUpperCase())).join(', ') : 'None / Healthy Profile'}
+                              </span>
+                              <Icon name="chevron-down" className={`w-4 h-4 transition-transform duration-200 ${medicalDropdownOpen ? 'rotate-180' : ''}`} />
+                            </button>
+                            
+                            {medicalDropdownOpen && (
+                              <React.Fragment>
+                                <div className="fixed inset-0 z-30" onClick={() => setMedicalDropdownOpen(false)} />
+                                <div className="absolute left-0 right-0 mt-2 p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-2xl shadow-xl z-40 max-h-60 overflow-y-auto space-y-1.5 animate-fade-in-up">
+                                  {[
+                                    { key: 'none', label: 'None / Healthy Profile' },
+                                    { key: 'diabetes', label: 'Diabetes' },
+                                    { key: 'hypertension', label: 'Hypertension (High BP)' },
+                                    { key: 'thyroid', label: 'Thyroid Condition' },
+                                    { key: 'pcos', label: 'PCOS / PCOD' },
+                                    { key: 'gerd', label: 'Acid Reflux / GERD' },
+                                    { key: 'cardiovascular', label: 'Cardiovascular (Heart) Disease' },
+                                    { key: 'fatty_liver', label: 'Fatty Liver' },
+                                    { key: 'obesity', label: 'Obesity' }
+                                  ].map(cond => {
+                                    const list = formData.medicalHistory ? formData.medicalHistory.split(',').map(x => x.trim().toLowerCase()).filter(Boolean) : [];
+                                    const isSelected = list.includes(cond.key);
+                                    
+                                    return (
+                                      <label key={cond.key} className="flex items-center space-x-2.5 px-3 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer select-none">
+                                        <input
+                                          type="checkbox"
+                                          checked={isSelected}
+                                          onChange={() => {
+                                            let updated = [];
+                                            if (cond.key === 'none') {
+                                              updated = ['none'];
+                                            } else {
+                                              const filtered = list.filter(x => x !== 'none');
+                                              if (filtered.includes(cond.key)) {
+                                                updated = filtered.filter(x => x !== cond.key);
+                                              } else {
+                                                updated = [...filtered, cond.key];
+                                              }
+                                              if (updated.length === 0) {
+                                                updated = ['none'];
+                                              }
+                                            }
+                                            setFormData(prev => ({
+                                              ...prev,
+                                              medicalHistory: updated.join(', ')
+                                            }));
+                                          }}
+                                          className="rounded text-emerald-500 focus:ring-emerald-500 w-4 h-4 border-slate-300"
+                                        />
+                                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-350">{cond.label}</span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
+                              </React.Fragment>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Hormonal Disturbance</label>
+                            <input 
+                              type="text" 
+                              name="hormonalDisturbance" 
+                              value={formData.hormonalDisturbance}
+                              onChange={handleInputChange}
+                              placeholder="e.g. PCOS, Thyroid (Hypo), None"
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Nutritional Deficiencies (Select All That Apply)</label>
+                          <div className="flex flex-wrap gap-2.5">
+                            {[
+                              { key: 'not_known', label: 'Not Known' },
+                              { key: 'vitamin_d', label: 'Vitamin D' },
+                              { key: 'vitamin_b12', label: 'Vitamin B12' },
+                              { key: 'iron', label: 'Iron (Anemia)' },
+                              { key: 'calcium', label: 'Calcium' },
+                              { key: 'none', label: 'None' }
+                            ].map((def) => {
+                              const isSelected = formData.nutritionalDeficiency.split(',').map(x => x.trim()).includes(def.key);
+                              return (
+                                <button
+                                  key={def.key}
+                                  type="button"
+                                  onClick={() => handleDeficiencyToggle(def.key)}
+                                  className={`px-4 py-2.5 rounded-xl border text-xs font-bold transition-all duration-200 ${
+                                    isSelected 
+                                      ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/10' 
+                                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800/80 text-slate-650 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                  }`}
+                                >
+                                  {isSelected ? '✓ ' : '+ '} {def.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Allergies & Intolerances</label>
+                          <input 
+                            type="text" 
+                            name="allergies" 
+                            value={formData.allergies}
+                            onChange={handleInputChange}
+                            placeholder="e.g. Lactose Intolerance, Gluten Sensitive, None"
+                            className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* STEP 4: GOAL & PREFERENCES */}
+                    {step === 4 && (
+                      <div className="space-y-6 animate-fade-in-up">
+                        <h3 className="font-display font-bold text-lg text-slate-800 dark:text-white border-b border-slate-200/40 dark:border-slate-800/40 pb-2">Step 4: Goals, Preferences & Meals</h3>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Diet & Fitness Goal</label>
+                            <select 
+                              name="goal" 
+                              value={formData.goal}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium"
+                            >
+                              <option value="weight_loss">Weight Loss (Caloric Deficit)</option>
+                              <option value="aggressive_weight_loss">Aggressive Weight Loss (Strict Deficit)</option>
+                              <option value="maintenance">Weight Maintenance</option>
+                              <option value="muscle_gain">Muscle Gain (High Protein Surplus)</option>
+                              <option value="weight_gain">Weight Gain (Calorie Surplus)</option>
+                              <option value="sports">Sports Performance (High Carb/High Protein)</option>
+                              <option value="recovery">Recovery after Injury/Surgery</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Diet Preference</label>
+                            <select 
+                              name="dietType" 
+                              value={formData.dietType}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium"
+                            >
+                              <option value="vegetarian">Indian Vegetarian (Standard)</option>
+                              <option value="non veg">Indian Non Veg (Eggs, Chicken, Fish, Mutton)</option>
+                              <option value="vegan">Vegan (No dairy/animal-products)</option>
+                              <option value="jain">Jain (No root vegetables)</option>
+                              <option value="punjabi">Punjabi Style Diet</option>
+                              <option value="gujarati">Gujarati Style Diet</option>
+                              <option value="south_indian">South Indian Style Diet</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Religious Custom Preference</label>
+                            <select 
+                              name="religiousPreference" 
+                              value={formData.religiousPreference}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium"
+                            >
+                              <option value="none">None</option>
+                              <option value="jain">Jain Rules (Strict)</option>
+                              <option value="brahmin">Brahmin Rules (No onion/garlic)</option>
+                              <option value="gujarati">Gujarati Traditional</option>
+                              <option value="standard">Standard Regional</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Eating Customs (e.g. Fasting, 1 or 2 meals)</label>
+                            <input 
+                              type="text" 
+                              name="eatingCustoms" 
+                              value={formData.eatingCustoms}
+                              onChange={handleInputChange}
+                              placeholder="e.g. Standard 3 meals, Ekadashi Fasting, 2 meals"
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Expected Outcomes</label>
+                            <input 
+                              type="text" 
+                              name="expectedOutcome" 
+                              value={formData.expectedOutcome}
+                              onChange={handleInputChange}
+                              placeholder="e.g. Lose 5kg fat, build muscle strength"
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Results Expected By When</label>
+                            <input 
+                              type="text" 
+                              name="resultsExpectedBy" 
+                              value={formData.resultsExpectedBy}
+                              onChange={handleInputChange}
+                              placeholder="e.g. 3 Months, 6 Weeks"
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Exercise / Activity Level</label>
+                            <select 
+                              name="activityLevel" 
+                              value={formData.activityLevel}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium"
+                            >
+                              <option value="sedentary">Sedentary (desk job, no exercise)</option>
+                              <option value="light">Light Activity (light exercise 1-3 days/wk)</option>
+                              <option value="moderate">Moderate Activity (exercise 3-5 days/wk)</option>
+                              <option value="very_active">Very Active (heavy exercise 6-7 days/wk)</option>
+                              <option value="extra_active">Extra Active (athletic physical training)</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Workout Equipment Available</label>
+                            <select 
+                              name="equipment" 
+                              value={formData.equipment}
+                              onChange={handleInputChange}
+                              className="w-full px-4 py-3 rounded-xl glass-input text-slate-800 dark:text-white font-medium"
+                            >
+                              <option value="bodyweight">Bodyweight / No Equipment</option>
+                              <option value="dumbbells">Dumbbells only</option>
+                              <option value="bands">Resistance Bands only</option>
+                              <option value="all">Full Gym (Dumbbells + Bands)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Active Meals to Include</label>
+                          <div className="flex flex-wrap gap-2.5">
+                            {[
+                              { key: 'breakfast', label: 'Breakfast' },
+                              { key: 'mid_morning_snack', label: 'Mid-Morning Snack' },
+                              { key: 'lunch', label: 'Lunch' },
+                              { key: 'evening_snack', label: 'Evening Snack' },
+                              { key: 'dinner', label: 'Dinner' }
+                            ].map((m) => {
+                              const active = formData.activeMeals.includes(m.key);
+                              return (
+                                <button
+                                  type="button"
+                                  key={m.key}
+                                  onClick={() => handleMealCheckboxChange(m.key)}
+                                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all border ${
+                                    active 
+                                      ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/10' 
+                                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                  }`}
+                                >
+                                  {active ? '✓ ' : '+ '} {m.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* NAVIGATION BUTTONS */}
+                    <div className="flex justify-between items-center pt-4 border-t border-slate-200/40 dark:border-slate-800/40 no-print">
+                      {step > 1 ? (
+                        <button
+                          type="button"
+                          onClick={handleBack}
+                          className="px-5 py-3 bg-slate-100 dark:bg-slate-850 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold rounded-xl transition-all text-xs sm:text-sm"
+                        >
+                          Back
+                        </button>
+                      ) : (
+                        <div />
+                      )}
+
+                      {step < 4 ? (
+                        <button
+                          key="next-btn"
+                          type="button"
+                          onClick={handleNext}
+                          className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.01] transition-all flex items-center space-x-1.5 text-xs sm:text-sm"
+                        >
+                          <span>Next Step</span>
+                          <Icon name="arrow-right" className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <button 
+                          key="submit-btn"
+                          type="button"
+                          onClick={generatePlan}
+                          className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center space-x-2 text-xs sm:text-sm"
+                        >
+                          <Icon name="sparkles" className="w-4 h-4" />
+                          <span>Generate regime</span>
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+
+                {/* FOOD EXPLORER SEARCH */}
+                <div id="foods-database" className="max-w-5xl mx-auto space-y-6 pt-4 scroll-mt-24">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                      <h2 className="font-display font-extrabold text-2xl text-slate-800 dark:text-white">Indian Food Nutrition database</h2>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Search calories, proteins, carbohydrates, and fats for vegetarian meals.</p>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { label: 'All Categories', value: '' },
+                        { label: 'Breakfast', value: 'breakfast' },
+                        { label: 'Lunch & Dinner', value: 'lunch' },
+                        { label: 'Snacks', value: 'snacks' }
+                      ].map((cat) => (
+                        <button
+                          key={cat.value}
+                          onClick={() => setFoodCategory(cat.value)}
+                          className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
+                            foodCategory === cat.value 
+                            ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/10' 
+                            : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-400'
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleSearchSubmit} className="flex gap-3">
+                    <div className="relative flex-1">
+                      <Icon name="search" className="absolute left-4.5 top-3.5 text-slate-400 dark:text-slate-500 w-5 h-5" />
+                      <input
+                         type="text"
+                         value={foodSearch}
+                         onChange={(e) => setFoodSearch(e.target.value)}
+                         placeholder="Search Indian foods (e.g., idli, dosa, paneer, sprouts)..."
+                         className="w-full pl-12 pr-4 py-3 rounded-2xl glass-input text-slate-800 dark:text-white font-medium placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      />
+                    </div>
+                    <button type="submit" className="px-6 py-3 bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 dark:hover:bg-emerald-700 text-white font-semibold rounded-2xl flex items-center gap-1.5">
+                      Search
+                    </button>
+                  </form>
+
+                  {searchingFoods ? (
+                    <div className="flex justify-center items-center py-16">
+                      <Icon name="refresh-cw" className="animate-spin text-emerald-500 w-8 h-8" />
+                    </div>
+                  ) : foodsList.length === 0 ? (
+                    <div className="text-center py-12 border border-dashed border-slate-200 dark:border-slate-800 rounded-3xl">
+                      <p className="text-slate-500 dark:text-slate-400 font-medium">No Indian food items found. Try another query!</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {foodsList.map((food, i) => (
+                        <div key={i} className="glass-card p-4 rounded-xl border border-slate-200/50 hover:border-emerald-300 dark:hover:border-emerald-900/60 transition-all flex flex-col justify-between">
+                          <div>
+                            <div className="flex justify-between items-start mb-1.5 gap-2">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <h4 className="font-display font-bold text-slate-800 dark:text-white text-base leading-tight capitalize truncate" title={food.name}>{food.name}</h4>
+                                <FoodTypeBadge isVeg={food.is_veg === 1} />
+                              </div>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 shrink-0">
+                                {food.category === 'lunch' || food.category === 'dinner' ? 'Main Meal' : food.category}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-400 dark:text-slate-500 mb-3">Serving: {food.serving_size}</p>
+                          </div>
+                          <div className="border-t border-slate-200/40 dark:border-slate-800/40 pt-3 mt-1 flex justify-between items-center text-center">
+                            <div>
+                              <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase">Calories</p>
+                              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{Math.round(food.calories)}</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase">Protein</p>
+                              <p className="text-sm font-bold text-blue-600 dark:text-blue-400">{food.protein}g</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase">Carbs</p>
+                              <p className="text-sm font-bold text-amber-500">{food.carbs}g</p>
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase">Fats</p>
+                              <p className="text-sm font-bold text-rose-500">{food.fats}g</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+
+            {/* LOADING STATE */}
+            {loading && (
+              <div className="flex flex-col items-center justify-center py-32 space-y-6">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-emerald-100 dark:border-emerald-950 border-t-emerald-500 animate-spin"></div>
+                  <Icon name="sparkles" className="absolute inset-0 m-auto text-emerald-500 animate-bounce w-6 h-6" />
+                </div>
+                <div className="text-center space-y-1.5">
+                  <h3 className="font-display font-extrabold text-xl text-slate-800 dark:text-white">Assembling custom diet algorithm...</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm">Calculating weight trajectory, hydration goals, and meal card lists for {formData.name}.</p>
+                </div>
+              </div>
+            )}
+
+            {/* DIET PLAN DASHBOARD */}
+            {dietPlan && !loading && (
+              <div className="space-y-8 animate-fade-in-up">
+                
+                {/* Header widget */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/40 dark:bg-slate-900/40 border border-slate-200/50 dark:border-slate-800/30 p-6 rounded-2xl backdrop-blur-md no-print">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center text-white shadow-md">
+                      <Icon name="user" className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h1 className="font-display font-extrabold text-2xl text-slate-800 dark:text-white">Welcome back, {formData.name}!</h1>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                        Diet goal: <span className="font-semibold text-emerald-600 dark:text-emerald-400 capitalize">{formData.goal.replace('_', ' ')}</span> &bull; Preference: <span className="font-semibold text-emerald-600 dark:text-emerald-400 capitalize">{formData.dietType}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2.5 w-full md:w-auto">
+                    <button onClick={() => window.print()} className="flex-1 md:flex-initial inline-flex items-center justify-center px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl shadow-md transition-all text-sm">
+                      <Icon name="file-text" className="w-4 h-4 mr-1.5" />
+                      Download PDF Report
+                    </button>
+                    <button onClick={() => setDietPlan(null)} className="flex-1 md:flex-initial inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all text-sm">
+                      <Icon name="rotate-ccw" className="w-4 h-4 mr-1.5" />
+                      Recalculate Plan
+                    </button>
+                  </div>
+                </div>
+
+                {/* Print Header */}
+                <div className="hidden print:block border-b-2 border-emerald-500 pb-4 mb-6">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h1 className="font-display font-extrabold text-3xl text-slate-900">Gyromotion NutriPlan</h1>
+                      <p className="text-sm text-slate-500">Personalized Indian Diet Plan & Nutrition Analysis</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold">Patient: {formData.name}</p>
+                      <p className="text-xs text-slate-500">Age: {formData.age} | Current Weight: {formData.weight}kg</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metric Cards Row */}
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="glass-card p-5 rounded-2xl border border-slate-200/50 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Body Mass Index</span>
+                      <div className="flex items-baseline space-x-1.5 mt-1">
+                        <span className="font-display font-extrabold text-2xl text-slate-800 dark:text-white">{bmiData?.bmi}</span>
+                        <span className="text-xs font-semibold text-emerald-600">kg/m²</span>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-400">
+                        {bmiData?.category}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-5 rounded-2xl border border-slate-200/50 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Basal Metabolic Rate</span>
+                      <div className="flex items-baseline space-x-1.5 mt-1">
+                        <span className="font-display font-extrabold text-2xl text-slate-800 dark:text-white">{bmrData?.bmr}</span>
+                        <span className="text-xs font-semibold text-orange-600">kcal/day</span>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2">Daily resting metabolic benchmark.</p>
+                  </div>
+
+                  <div className="glass-card p-5 rounded-2xl border border-slate-200/50 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Total Energy Burn</span>
+                      <div className="flex items-baseline space-x-1.5 mt-1">
+                        <span className="font-display font-extrabold text-2xl text-slate-800 dark:text-white">{bmrData?.tdee}</span>
+                        <span className="text-xs font-semibold text-amber-600">kcal/day</span>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2">Active energy metabolic burn.</p>
+                  </div>
+
+                  <div className="glass-card p-5 rounded-2xl border border-slate-200/50 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Diet Calorie Target</span>
+                      <div className="flex items-baseline space-x-1.5 mt-1">
+                        <span className="font-display font-extrabold text-2xl text-slate-800 dark:text-white">{dietPlan?.target_calories}</span>
+                        <span className="text-xs font-semibold text-rose-600">kcal/day</span>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2">Configured threshold calorie deficit.</p>
+                  </div>
+
+                  <div className="glass-card p-5 rounded-2xl border border-slate-200/50 col-span-2 md:col-span-1 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Protein Target</span>
+                      <div className="flex items-baseline space-x-1.5 mt-1">
+                        <span className="font-display font-extrabold text-2xl text-slate-800 dark:text-white">{dietPlan?.target_protein_g}</span>
+                        <span className="text-xs font-semibold text-blue-600">grams/day</span>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2">Protein benchmark for muscle tone.</p>
+                  </div>
+                </div>
+
+                {/* Charts Layout with Canvas elements */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="glass-card p-6 rounded-3xl border border-slate-200/50 flex flex-col justify-between h-[340px]">
+                    <div>
+                      <h3 className="font-display font-bold text-slate-800 dark:text-white text-base mb-1">Calorie Balance</h3>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Comparison of target requirements vs actual generated meals.</p>
+                    </div>
+                    <div className="flex-1 min-h-0 relative">
+                      <canvas ref={calorieChartRef}></canvas>
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-6 rounded-3xl border border-slate-200/50 flex flex-col justify-between h-[340px]">
+                    <div>
+                      <h3 className="font-display font-bold text-slate-800 dark:text-white text-base mb-1">Macro Energy Distribution</h3>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Macronutrient calorie splits for the recommended diet plan.</p>
+                    </div>
+                    <div className="flex-1 min-h-0 relative">
+                      <canvas ref={macroChartRef}></canvas>
+                    </div>
+                  </div>
+
+                  <div className="glass-card p-6 rounded-3xl border border-slate-200/50 flex flex-col justify-between h-[340px]">
+                    <div>
+                      <h3 className="font-display font-bold text-slate-800 dark:text-white text-base mb-1">12-Week Weight Projection</h3>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Estimated target progress curve targeting weight loss.</p>
+                    </div>
+                    <div className="flex-1 min-h-0 relative">
+                      <canvas ref={weightChartRef}></canvas>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hydration Tracker */}
+                <div className="glass-card p-6 rounded-3xl border border-slate-200/50 flex flex-col md:flex-row justify-between items-center gap-6 no-print">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-14 h-14 rounded-2xl bg-blue-100 dark:bg-blue-950/40 text-blue-600 flex items-center justify-center animate-bounce">
+                      <Icon name="droplet" className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-bold text-slate-800 dark:text-white text-lg">Daily Water Intake Calculator</h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Hydration goal: <span className="font-semibold text-slate-800 dark:text-white">{formData.weight * 35}ml</span> ({waterGoalCups} cups of 250ml).
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-center md:items-end gap-3 w-full md:w-auto">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-2xl font-extrabold text-blue-600">{waterCups * 250}ml</span>
+                      <span className="text-sm text-slate-400">/ {waterGoalCups * 250}ml</span>
+                      {waterCups >= waterGoalCups && (
+                        <span className="animate-bounce inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 dark:bg-green-950/60 text-green-700 dark:text-green-400 border border-green-200">
+                          🎉 Goal Reached!
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 flex-wrap justify-center md:justify-end">
+                      {Array.from({ length: waterGoalCups }).map((_, i) => (
+                        <WaterGlass
+                          key={i}
+                          filled={i < waterCups}
+                          time={getWaterTime(i, waterGoalCups)}
+                          onClick={() => setWaterCups(i + 1)}
+                        />
+                      ))}
+                      <button 
+                        onClick={() => setWaterCups(0)} 
+                        className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-650 dark:hover:text-white transition-colors ml-1 shadow-sm" 
+                        title="Reset Water Tracker"
+                      >
+                        <Icon name="rotate-ccw" className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recommended Meals Grid */}
+                <div className="space-y-6">
+                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                     <div>
+                       <h2 className="font-display font-extrabold text-2xl text-slate-800 dark:text-white">Meal Plan Recommendations</h2>
+                       <p className="text-sm text-slate-500 dark:text-slate-400">Calorie and protein-optimized diet splits for Indian food items.</p>
+                     </div>
+                     <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200/40 dark:border-slate-800/40 no-print">
+                       <button
+                         onClick={() => setDietViewMode('daily')}
+                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
+                           dietViewMode === 'daily'
+                             ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/10'
+                             : 'text-slate-650 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+                         }`}
+                       >
+                         Daily Plan
+                       </button>
+                       <button
+                         onClick={() => setDietViewMode('monthly')}
+                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
+                           dietViewMode === 'monthly'
+                             ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/10'
+                             : 'text-slate-650 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
+                         }`}
+                       >
+                         30-Day Calendar
+                       </button>
+                     </div>
+                   </div>
+
+                  {/* ADVISORIES & GUIDELINES GRID */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {/* Salad Recommendation Card */}
+                    <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/60 rounded-2xl flex items-start space-x-3 text-emerald-800 dark:text-emerald-300 animate-fade-in-up">
+                      <span className="text-lg leading-none mt-0.5">🥗</span>
+                      <div>
+                        <h4 className="font-bold text-sm">Standard Healing Salad Recommendation</h4>
+                        <p className="text-xs mt-0.5 leading-relaxed">{dietPlan.salad.description}</p>
+                        <div className="flex flex-wrap gap-2.5 mt-2.5 text-[10px] font-extrabold uppercase">
+                          <span className="bg-emerald-100 dark:bg-emerald-900/40 px-2 py-0.5 rounded text-emerald-700 dark:text-emerald-300">{dietPlan.salad.calories} kcal</span>
+                          <span className="bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded text-blue-700 dark:text-blue-300">P: {dietPlan.salad.protein}g</span>
+                          <span className="bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 rounded text-amber-700 dark:text-amber-300">C: {dietPlan.salad.carbs}g</span>
+                          <span className="bg-rose-100 dark:bg-rose-900/40 px-2 py-0.5 rounded text-rose-700 dark:text-rose-300">F: {dietPlan.salad.fats}g</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Medical Advisory Card */}
+                    {dietPlan.medical_tip && (
+                      <div className="p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 rounded-2xl flex items-start space-x-3 text-emerald-800 dark:text-emerald-400 animate-fade-in-up no-print">
+                        <span className="text-lg leading-none mt-0.5">⚕️</span>
+                        <div>
+                          <h4 className="font-bold text-sm">Personalized Dietary Advisory</h4>
+                          <p className="text-xs mt-0.5 leading-relaxed whitespace-pre-line">{dietPlan.medical_tip}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Ghee Advisory Card */}
+                    {dietPlan.ghee_advisory && (
+                      <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-2xl flex items-start space-x-3 text-amber-800 dark:text-amber-300 animate-fade-in-up">
+                        <span className="text-lg leading-none mt-0.5">🧈</span>
+                        <div>
+                          <h4 className="font-bold text-sm">Ghee Dietary Advisory</h4>
+                          <p className="text-xs mt-0.5 leading-relaxed">{dietPlan.ghee_advisory}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Weight Loss Guidelines Card */}
+                    {(formData.goal.includes('loss') || formData.goal.includes('fat_loss')) && (
+                      <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 rounded-2xl flex items-start space-x-3 text-blue-800 dark:text-blue-300 animate-fade-in-up">
+                        <span className="text-lg leading-none mt-0.5">💡</span>
+                        <div>
+                          <h4 className="font-bold text-sm">Weight Loss Guidelines</h4>
+                          <p className="text-xs mt-0.5 leading-relaxed">
+                            To support healthy weight loss, focus on high-volume low-calorie foods (like salads and green vegetables), maintain a consistent sleep schedule (7-8 hours), hydrate well (minimum {waterGoalCups * 250}ml/day), and avoid processed sugars. Keep dinner lighter and high in fiber.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Recommended Meals Grid */}
+                  {dietViewMode === 'monthly' ? (
+                    <div className="space-y-6 no-print">
+                      {/* Calendar Grid */}
+                      <div className="glass-card rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/30">
+                        <h3 className="font-display font-extrabold text-lg text-slate-800 dark:text-white mb-2">30-Day Monthly Diet Calendar</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">Select a day to view its specific menu. The diet alternates between the primary menu and 3 custom combination plans.</p>
+                        
+                        <div className="space-y-6">
+                          {[1, 2, 3, 4, 5].map((weekNum) => {
+                            const startDay = (weekNum - 1) * 7 + 1;
+                            if (startDay > 30) return null;
+                            const endDay = Math.min(30, weekNum * 7);
+                            const days = Array.from({ length: endDay - startDay + 1 }, (_, i) => startDay + i);
+                            
+                            return (
+                              <div key={weekNum} className="space-y-2">
+                                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Week {weekNum}</h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
+                                  {days.map((d) => {
+                                    const dayIdx = d - 1;
+                                    const comboIdx = dayIdx % 4;
+                                    const isSelected = selectedCalendarDay === d;
+                                    
+                                    return (
+                                      <button
+                                        key={d}
+                                        onClick={() => setSelectedCalendarDay(d)}
+                                        className={`p-3.5 rounded-2xl border text-left transition-all duration-300 outline-none focus:outline-none ${
+                                          isSelected
+                                            ? 'bg-emerald-500/10 border-emerald-500 dark:border-emerald-500/80 shadow-md scale-[1.03]'
+                                            : 'bg-slate-50/50 dark:bg-slate-900/20 border-slate-200/50 dark:border-slate-800/30 hover:border-slate-350 dark:hover:border-slate-750 hover:scale-[1.01]'
+                                        }`}
+                                      >
+                                        <div className="flex justify-between items-start mb-1.5">
+                                          <span className={`text-xs font-extrabold ${isSelected ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                                            Day {d}
+                                          </span>
+                                          <span className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-full ${
+                                            comboIdx === 0
+                                              ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400'
+                                              : comboIdx === 1
+                                              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
+                                              : comboIdx === 2
+                                              ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400'
+                                              : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400'
+                                          }`}>
+                                            {comboIdx === 0 ? 'Primary' : `Combo ${comboIdx}`}
+                                          </span>
+                                        </div>
+                                        <div className="text-[10px] text-slate-450 dark:text-slate-500 leading-tight truncate">
+                                          {dietPlan.thirty_day_plan[dayIdx] && dietPlan.thirty_day_plan[dayIdx].meals.map(m => {
+                                            return m.items.map(it => it.name).join(' + ');
+                                          }).join(', ').substring(0, 30) + '...'}
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      
+                      {/* Detailed Selected Day View */}
+                      <div className="space-y-6 bg-slate-50/40 dark:bg-slate-900/10 p-6 rounded-3xl border border-slate-200/40 dark:border-slate-800/20">
+                        <div className="flex justify-between items-center border-b border-slate-200/30 dark:border-slate-800/30 pb-4">
+                          <div>
+                            <h3 className="font-display font-extrabold text-xl text-slate-800 dark:text-white">
+                              Day {selectedCalendarDay} Detailed Menu
+                            </h3>
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                              Showing menu for Day <span className="font-bold text-emerald-600 dark:text-emerald-400">{selectedCalendarDay}</span>
+                            </p>
+                          </div>
+                        </div>
+                        
+                                                <div className={`grid grid-cols-1 ${
+                          dietPlan.thirty_day_plan[selectedCalendarDay - 1].meals.length === 2 ? 'md:grid-cols-2' :
+                          dietPlan.thirty_day_plan[selectedCalendarDay - 1].meals.length === 3 ? 'md:grid-cols-3' :
+                          dietPlan.thirty_day_plan[selectedCalendarDay - 1].meals.length === 4 ? 'md:grid-cols-4' :
+                          'md:grid-cols-5'
+                        } gap-6`}>
+                          {dietPlan.thirty_day_plan[selectedCalendarDay - 1].meals.map((meal, mealIdx) => {
+                            const items = meal.items;
+                            const mealCals = meal.calories;
+                            const mealProts = meal.protein;
+                            const mealCarbs = meal.carbs;
+                            const mealFats = meal.fats;
+                            
+                            return (
+                              <div key={meal.key} className="glass-card rounded-2xl border border-slate-200/50 p-5 flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group">
+                                <div className="absolute top-4 right-4 text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-100/50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
+                                  {meal.target_kcal_pct}
+                                </div>
+                                <div>
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Meal {mealIdx + 1}</span>
+                                  <h3 className="font-display font-extrabold text-lg text-slate-800 dark:text-white mt-1 mb-4 flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                                    {meal.label}
+                                  </h3>
+                                  
+                                                                    <div className="space-y-2 mb-4">
+                                    {items.map((item, idx) => (
+                                      <div key={idx} className="bg-slate-50/50 dark:bg-slate-900/40 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/80 relative flex justify-between items-start">
+                                        <div className="pr-4">
+                                          <p className="font-bold text-slate-800 dark:text-slate-200 text-xs leading-snug flex items-center gap-1.5 capitalize">
+                                            <span>{item.name}</span>
+                                            <FoodTypeBadge isVeg={item.is_veg !== 0} />
+                                          </p>
+                                          <p className="text-[10px] text-slate-405">Portion: {item.serving_size}</p>
+                                          <div className="text-[9px] text-slate-500 dark:text-slate-400 mt-1.5 space-y-0.5 border-t border-slate-200/20 pt-1">
+                                            <p><span className="font-bold text-slate-600 dark:text-slate-400">Vitamins:</span> {item.vitamins || 'B-complex'}</p>
+                                            <p><span className="font-bold text-slate-600 dark:text-slate-400">Amino Acids:</span> {item.amino_acids || 'Glutamic Acid'}</p>
+                                          </div>
+                                        </div>
+                                        
+                                        {/* Swap button */}
+                                        <button 
+                                          onClick={() => handleSwap(meal.key, idx, item.name, item.calories, selectedCalendarDay - 1)}
+                                          className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-emerald-500 no-print transition-colors self-start shrink-0"
+                                          title={`Swap ${item.name}`}
+                                        >
+                                          <Icon name="refresh-cw" className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                <div className="border-t border-slate-200/40 dark:border-slate-800/40 pt-3 flex justify-between text-center text-[10px] font-semibold">
+                                  <div className="flex-1">
+                                    <span className="text-slate-400">kcal</span>
+                                    <p className="text-slate-700 dark:text-slate-300 font-bold">{mealCals}</p>
+                                  </div>
+                                  <div className="flex-1">
+                                    <span className="text-slate-400">prot</span>
+                                    <p className="text-slate-700 dark:text-slate-300 font-bold">{mealProts}g</p>
+                                  </div>
+                                  <div className="flex-1">
+                                    <span className="text-slate-400">carbs</span>
+                                    <p className="text-slate-700 dark:text-slate-300 font-bold">{mealCarbs}g</p>
+                                  </div>
+                                  <div className="flex-1">
+                                    <span className="text-slate-400">fats</span>
+                                    <p className="text-slate-700 dark:text-slate-300 font-bold">{mealFats}g</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                                        <div className={`grid grid-cols-1 ${
+                      dietPlan.thirty_day_plan[selectedCalendarDay - 1].meals.length === 2 ? 'md:grid-cols-2' :
+                      dietPlan.thirty_day_plan[selectedCalendarDay - 1].meals.length === 3 ? 'md:grid-cols-3' :
+                      dietPlan.thirty_day_plan[selectedCalendarDay - 1].meals.length === 4 ? 'md:grid-cols-4' :
+                      'md:grid-cols-5'
+                    } gap-6 no-print`}>
+                      {dietPlan.thirty_day_plan[selectedCalendarDay - 1].meals.map((meal, mealIdx) => (
+                        <div key={meal.key} className="glass-card rounded-2xl border border-slate-200/50 p-5 flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group">
+                          <div className="absolute top-4 right-4 text-[10px] font-bold text-emerald-600 uppercase tracking-widest bg-emerald-100/50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">
+                            {meal.target_kcal_pct}
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Meal {mealIdx + 1}</span>
+                            <h3 className="font-display font-extrabold text-lg text-slate-800 dark:text-white mt-1 mb-4 flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                              {meal.label}
+                            </h3>
+                            
+                            <div className="space-y-2 mb-4">
+                              {meal.items.map((item, idx) => (
+                                <div key={idx} className="bg-slate-50/50 dark:bg-slate-900/40 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/80 relative flex justify-between items-start">
+                                  <div className="pr-4">
+                                    <p className="font-bold text-slate-800 dark:text-slate-200 text-xs leading-snug flex items-center gap-1.5 capitalize">
+                                      <span>{item.name}</span>
+                                      <FoodTypeBadge isVeg={item.is_veg !== 0} />
+                                    </p>
+                                    <p className="text-[10px] text-slate-455">Portion: {item.serving_size}</p>
+                                    <div className="text-[9px] text-slate-500 dark:text-slate-400 mt-1.5 space-y-0.5 border-t border-slate-200/20 pt-1">
+                                      <p><span className="font-bold text-slate-600 dark:text-slate-400">Vitamins:</span> {item.vitamins || 'B-complex'}</p>
+                                      <p><span className="font-bold text-slate-600 dark:text-slate-400">Amino Acids:</span> {item.amino_acids || 'Glutamic Acid'}</p>
+                                    </div>
+                                  </div>
+                                  <button 
+                                    onClick={() => handleSwap(meal.key, idx, item.name, item.calories, selectedCalendarDay - 1)}
+                                    className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-emerald-500 no-print transition-colors self-start shrink-0"
+                                    title={`Swap ${item.name}`}
+                                  >
+                                    <Icon name="refresh-cw" className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="border-t border-slate-200/40 dark:border-slate-800/40 pt-3 flex justify-between text-center text-[10px] font-semibold">
+                            <div className="flex-1">
+                              <span className="text-slate-400">kcal</span>
+                              <p className="text-slate-700 dark:text-slate-300 font-bold">{meal.calories}</p>
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-slate-400">prot</span>
+                              <p className="text-slate-700 dark:text-slate-300 font-bold">{meal.protein}g</p>
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-slate-400">carbs</span>
+                              <p className="text-slate-700 dark:text-slate-300 font-bold">{meal.carbs}g</p>
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-slate-400">fats</span>
+                              <p className="text-slate-700 dark:text-slate-300 font-bold">{meal.fats}g</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  </div>
+                </div>
+
+                                {/* Alternative Meal Combinations Table */}
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="font-display font-extrabold text-2xl text-slate-800 dark:text-white">Alternative Meal Combinations</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Discover alternate daily combination sets that match your target calorie limits.</p>
+                  </div>
+
+                  <div className="glass-card rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/30 overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                          <tr className="border-b border-slate-200/50 dark:border-slate-800/50">
+                            <th className="p-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider w-24">Combo Set</th>
+                            {dietPlan.thirty_day_plan[selectedCalendarDay - 1].meals.map((meal) => (
+                              <th key={meal.key} className="p-4 font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider capitalize">
+                                {meal.label}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-200/30 dark:divide-slate-800/30">
+                          {[0, 1, 2].map((comboIdx) => (
+                            <tr key={comboIdx} className="hover:bg-slate-50/30 dark:hover:bg-slate-900/10 transition-colors">
+                              <td className="p-4 font-display font-bold text-slate-800 dark:text-white">
+                                Combo {comboIdx + 1}
+                              </td>
+                              {dietPlan.thirty_day_plan[selectedCalendarDay - 1].meals.map((meal) => {
+                                const altMeal = meal.alternatives && meal.alternatives[comboIdx];
+                                if (!altMeal || !altMeal.items || altMeal.items.length === 0) {
+                                  return (
+                                    <td key={meal.key} className="p-4 text-slate-400 dark:text-slate-600 italic">
+                                      No alternative available
+                                    </td>
+                                  );
+                                }
+                                const totalCal = altMeal.items.reduce((sum, item) => sum + item.calories, 0);
+                                return (
+                                  <td key={meal.key} className="p-4 align-top min-w-[180px]">
+                                    <div className="space-y-1.5">
+                                      <div className="font-bold text-slate-800 dark:text-slate-200 text-xs">
+                                        {altMeal.items.map((item, idx) => (
+                                          <div key={idx} className="mb-1">
+                                            <span className="inline-flex items-center gap-1.5 mr-2 capitalize">
+                                              <span>{item.name}</span>
+                                              <FoodTypeBadge isVeg={item.is_veg !== 0} />
+                                            </span>
+                                            <div className="text-[9px] text-slate-450 dark:text-slate-500 mt-0.5">
+                                              Vitamins: {item.vitamins || 'B-complex'} <br />
+                                              Amino Acids: {item.amino_acids || 'Glutamic Acid'}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                      <div className="text-[10px] text-slate-400 dark:text-slate-500 leading-normal">
+                                        {altMeal.items.map(item => item.serving_size).join(' + ')}
+                                      </div>
+                                      <div className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                                        {totalCal} kcal
+                                      </div>
+                                    </div>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* WEEKLY EXERCISE & REHABILITATION PLAN */}
+                <div className="space-y-6 break-inside-avoid">
+                  <div className="no-print">
+                    <h2 className="font-display font-extrabold text-2xl text-slate-800 dark:text-white">Weekly Exercise & Rehabilitation Plan</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Custom training program generated based on your age, equipment, and injury status.</p>
+                  </div>
+
+                  {/* Day selector tabs (screen only) */}
+                  <div className="no-print glass-card rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/30">
+                    <div className="flex flex-wrap gap-2 mb-6 border-b border-slate-200/30 dark:border-slate-800/30 pb-4">
+                      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => (
+                        <button
+                          key={day}
+                          onClick={() => setActiveDay(day)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
+                            activeDay === day 
+                              ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/10 scale-105' 
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200/65 dark:hover:bg-slate-700/60'
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                         {/* Exercises List for Active Day */}
+                    {dietPlan.exercise_chart && dietPlan.exercise_chart[activeDay] && dietPlan.exercise_chart[activeDay].exercises && dietPlan.exercise_chart[activeDay].exercises.length > 0 ? (
+                      <div>
+                        {/* Workout Info Meta */}
+                        <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400 mb-6 bg-slate-50 dark:bg-slate-900/60 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800/40">
+                          <div><span className="text-slate-400 font-normal">Workout Type:</span> <span className="text-slate-700 dark:text-slate-300 font-bold">{dietPlan.exercise_chart[activeDay].workout}</span></div>
+                          <div className="hidden sm:block text-slate-300">|</div>
+                          <div><span className="text-slate-400 font-normal">Intensity:</span> <span className="text-slate-700 dark:text-slate-300 font-bold">{dietPlan.exercise_chart[activeDay].intensity}</span></div>
+                          <div className="hidden sm:block text-slate-300">|</div>
+                          <div><span className="text-slate-400 font-normal">Duration:</span> <span className="text-slate-700 dark:text-slate-300 font-bold">{dietPlan.exercise_chart[activeDay].duration}</span></div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {dietPlan.exercise_chart[activeDay].exercises.map((exercise, idx) => (
+                            <div key={idx} className="bg-slate-50/50 dark:bg-slate-900/40 border border-slate-150 dark:border-slate-800/80 rounded-2xl p-5 flex flex-col sm:flex-row gap-5 hover:border-emerald-300 dark:hover:border-emerald-950 transition-all duration-300">
+                              {/* Image Category Visual */}
+                              <div className="w-full sm:w-28 h-28 rounded-xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-950 flex items-center justify-center relative border border-slate-200 dark:border-slate-850">
+                                <img 
+                                  src={`/images/${exercise.category}.png`} 
+                                  alt={exercise.category} 
+                                  className="w-full h-full object-cover object-center" 
+                                  onError={(e) => {
+                                    e.target.src = `/static/images/${exercise.category}.png`;
+                                  }}
+                                />
+                                <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/60 text-[9px] font-bold text-white rounded-md uppercase tracking-wider">
+                                  {exercise.category}
+                                </span>
+                              </div>
+
+                              {/* Exercise Content */}
+                              <div className="flex-1 flex flex-col justify-between">
+                                <div>
+                                  <h4 className="font-display font-extrabold text-slate-800 dark:text-white text-sm mb-1">{exercise.name}</h4>
+                                  <p className="text-xs text-slate-550 dark:text-slate-400 leading-relaxed mb-3">{exercise.desc}</p>
+                                </div>
+                                
+                                {/* Equipment Alternatives */}
+                                <div className="border-t border-slate-200/40 dark:border-slate-800/40 pt-3 space-y-1 text-[11px]">
+                                  <p className="text-slate-650 dark:text-slate-350">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">Dumbbell Alt:</span> {exercise.dumbbell_alt}
+                                  </p>
+                                  <p className="text-slate-650 dark:text-slate-350">
+                                    <span className="font-bold text-emerald-600 dark:text-emerald-400">Band Alt:</span> {exercise.band_alt}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <span className="text-3xl">🧘</span>
+                        <h3 className="font-display font-bold text-slate-800 dark:text-white text-lg mt-3">Rest & Recovery Day</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs mx-auto">Allow muscles to repair and adapt. Hydrate well, perform gentle stretching, and focus on clean nutrition.</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* PRINT ONLY EXERCISE SCHEDULE (all 7 days list) */}
+                  <div className="hidden print:block space-y-6">
+                    <h2 className="text-xl font-bold border-b pb-2 mb-4">Weekly Exercise Schedule</h2>
+                    <div className="grid grid-cols-1 gap-6">
+                      {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
+                        const dayEx = dietPlan.exercise_chart && dietPlan.exercise_chart[day];
+                        return (
+                          <div key={day} className="break-inside-avoid">
+                            <h3 className="font-bold text-sm text-emerald-700 uppercase tracking-wider mb-2 border-b pb-0.5">
+                              {day} {dayEx && dayEx.workout ? ` - ${dayEx.workout} (${dayEx.intensity}, ${dayEx.duration})` : ''}
+                            </h3>
+                            {dayEx && dayEx.exercises && dayEx.exercises.length > 0 ? (
+                              <div className="grid grid-cols-2 gap-4">
+                                {dayEx.exercises.map((ex, idx) => (
+                                  <div key={idx} className="border p-3 rounded-lg text-[11px] bg-white">
+                                    <h4 className="font-bold text-slate-800">{ex.name} ({ex.category})</h4>
+                                    <p className="text-slate-500 mt-1">{ex.desc}</p>
+                                    <div className="mt-2 space-y-0.5 text-[10px]">
+                                      <p><strong>Dumbbell Alt:</strong> {ex.dumbbell_alt}</p>
+                                      <p><strong>Band Alt:</strong> {ex.band_alt}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-slate-400 italic">Rest & Recovery Day</p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>>
+                  </div>
+                </div>
+
+                {/* SERVING SIZE LOOKUP TABLE */}
+                <div className="glass-card rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/30 no-print">
+                  <button 
+                    onClick={() => setShowServingSizes(!showServingSizes)}
+                    className="w-full flex justify-between items-center outline-none focus:outline-none"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="p-2 bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-xl">
+                        <Icon name="scale" className="w-5 h-5" />
+                      </span>
+                      <div className="text-left">
+                        <h3 className="font-display font-extrabold text-lg text-slate-800 dark:text-white">Standard Serving Size & Exchange Reference</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Check portion size translations for diet plan compliance.</p>
+                      </div>
+                    </div>
+                    <div className={`p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-650 transition-transform duration-200 ${showServingSizes ? 'rotate-90' : ''}`}>
+                      <Icon name="chevron-right" className="w-4 h-4" />
+                    </div>
+                  </button>
+
+                  {showServingSizes && (
+                    <div className="mt-6 border-t border-slate-200/30 dark:border-slate-800/30 pt-6 animate-fade-in-up">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {[
+                          { category: 'Cereals & Grains', items: [
+                            { name: 'Chapati / Roti', size: '1 piece (30g raw weight)' },
+                            { name: 'Rice (Plain)', size: '1 plate (168g cooked weight / 50g raw)' },
+                            { name: 'Dosa', size: '1 piece (60g)' },
+                            { name: 'Idli', size: '2 pieces (60g)' }
+                          ]},
+                          { category: 'Proteins & Dairy', items: [
+                            { name: 'Dal / Lentils', size: '1 bowl (150g cooked / 30g raw)' },
+                            { name: 'Paneer', size: '100g serving portion' },
+                            { name: 'Sprouts', size: '1 cup (100g)' },
+                            { name: 'Cow Milk', size: '1 glass (200ml)' },
+                            { name: 'Curd / Dahi', size: '1 bowl (150g)' }
+                          ]},
+                          { category: 'Fats, Fruits & Nuts', items: [
+                            { name: 'Ghee', size: '1 tsp (5g portion)' },
+                            { name: 'Almonds', size: '12-15 pieces (28g)' },
+                            { name: 'Walnuts', size: '1 oz (28g)' },
+                            { name: 'Apple / Banana', size: '1 medium fruit (100g)' },
+                            { name: 'Healing Salad', size: '1 plate (150g / half portions each)' }
+                          ]}
+                        ].map((group, gIdx) => (
+                          <div key={gIdx} className="bg-slate-50/50 dark:bg-slate-900/40 p-4 rounded-2xl border border-slate-150 dark:border-slate-800/60">
+                            <h4 className="font-display font-bold text-slate-800 dark:text-white text-sm mb-3 border-b border-slate-200/40 dark:border-slate-800/40 pb-1.5">{group.category}</h4>
+                            <div className="space-y-2">
+                              {group.items.map((item, itemIdx) => (
+                                <div key={itemIdx} className="flex justify-between text-xs">
+                                  <span className="font-semibold text-slate-700 dark:text-slate-350">{item.name}</span>
+                                  <span className="text-slate-450 text-right">{item.size}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* PRINT-ONLY SERVING SIZES TABLE */}
+                <div className="hidden print:block space-y-4 break-inside-avoid">
+                  <h2 className="text-xl font-bold border-b pb-2 mb-4">Serving Size Reference</h2>
+                  <table className="w-full text-left border-collapse text-[11px]">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="py-2">Category</th>
+                        <th className="py-2">Food Item</th>
+                        <th className="py-2">Standard Serving Portion</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { category: 'Cereals', item: 'Chapati / Roti', portion: '1 piece (30g raw weight)' },
+                        { category: 'Cereals', item: 'Rice (Plain)', portion: '1 plate (168g cooked weight / 50g raw)' },
+                        { category: 'Cereals', item: 'Dosa / Idli', portion: '1 Dosa (60g) / 2 Idlis (60g)' },
+                        { category: 'Proteins', item: 'Dal / Lentils', portion: '1 bowl (150g cooked / 30g raw)' },
+                        { category: 'Proteins', item: 'Paneer / Sprouts', portion: '100g Paneer / 1 cup Sprouts (100g)' },
+                        { category: 'Dairy', item: 'Cow Milk / Curd', portion: '1 glass Milk (200ml) / 1 bowl Curd (150g)' },
+                        { category: 'Fats', item: 'Ghee', portion: '1 tsp (5g portion)' },
+                        { category: 'Nuts', item: 'Almonds / Walnuts', portion: '12-15 Almonds (28g) / 1 oz Walnuts (28g)' },
+                        { category: 'Vegetables', item: 'Healing Salad', portion: '1 plate (150g / half portions each)' }
+                      ].map((row, rIdx) => (
+                        <tr key={rIdx} className="border-b border-slate-100">
+                          <td className="py-1.5 font-bold">{row.category}</td>
+                          <td className="py-1.5">{row.item}</td>
+                          <td className="py-1.5 text-slate-500">{row.portion}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                                {/* PRINT-ONLY 30-DAY MONTHLY DIET CALENDAR TABLE */}
+                <div className="hidden print:block space-y-4 pt-6">
+                  <h2 className="text-xl font-bold border-b pb-2 mb-4">Patient 30-Day Monthly Diet Calendar</h2>
+                  {dietPlan.medical_tip && (
+                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 text-xs font-semibold mb-4 leading-normal whitespace-pre-line">
+                      <strong>Personalized Dietary Advisory:</strong><br/>
+                      {dietPlan.medical_tip}
+                    </div>
+                  )}
+                  <p className="text-xs text-slate-500 mb-4">A complete 30-day structured monthly diet plan cycling your personalized macros and custom combination menus.</p>
+                  
+                  <table className="w-full text-left border-collapse text-[9px] border">
+                    <thead>
+                      <tr className="bg-slate-100 border-b">
+                        <th className="py-1.5 border px-1.5 font-bold w-12 text-center">Day</th>
+                        <th className="py-1.5 border px-1.5 font-bold">Breakfast</th>
+                        <th className="py-1.5 border px-1.5 font-bold">Mid-Morning Snack</th>
+                        <th className="py-1.5 border px-1.5 font-bold">Lunch</th>
+                        <th className="py-1.5 border px-1.5 font-bold">Evening Snack</th>
+                        <th className="py-1.5 border px-1.5 font-bold">Dinner</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dietPlan.thirty_day_plan.map((dayPlan) => {
+                        const d = dayPlan.day;
+                        return (
+                          <tr key={d} className="border-b">
+                            <td className="py-1.5 border px-1.5 font-bold text-center">Day {d}</td>
+                            {['breakfast', 'mid_morning_snack', 'lunch', 'evening_snack', 'dinner'].map((mKey) => {
+                              const meal = dayPlan.meals.find(m => m.key === mKey);
+                              if (!meal) {
+                                return <td key={mKey} className="py-1.5 border px-1.5 text-center text-slate-400">-</td>;
+                              }
+                              return (
+                                <td key={mKey} className="py-1.5 border px-1.5 text-slate-700 align-top">
+                                  <div className="font-bold">{meal.items.map(it => it.name).join(' + ')}</div>
+                                  <div className="text-[8px] text-slate-450 leading-tight">({meal.items.map(it => it.serving_size).join(' + ')})</div>
+                                  <div className="text-[8px] text-slate-500 mt-1 border-t border-slate-100 pt-0.5 leading-snug">
+                                    <strong>Vits:</strong> {meal.items.map(it => it.vitamins).join(', ')}<br/>
+                                    <strong>AAs:</strong> {meal.items.map(it => it.amino_acids).join(', ')}
+                                  </div>
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* CASE HISTORY ACCORDION */}
+                <div className="glass-card rounded-3xl p-6 border border-slate-200/50 dark:border-slate-800/30 no-print">
+                  <button 
+                    onClick={() => setShowCaseHistory(!showCaseHistory)}
+                    className="w-full flex justify-between items-center outline-none focus:outline-none"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="p-2 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                        <Icon name="user" className="w-5 h-5" />
+                      </span>
+                      <div className="text-left">
+                        <h3 className="font-display font-extrabold text-lg text-slate-800 dark:text-white">Patient Assessment Case History</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Review the comprehensive 26-field assessment records submitted.</p>
+                      </div>
+                    </div>
+                    <div className={`p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-650 transition-transform duration-200 ${showCaseHistory ? 'rotate-90' : ''}`}>
+                      <Icon name="chevron-right" className="w-4 h-4" />
+                    </div>
+                  </button>
+
+                  {showCaseHistory && (
+                    <div className="mt-6 border-t border-slate-200/30 dark:border-slate-800/30 pt-6 animate-fade-in-up">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-xs">
+                        
+                        {/* Column 1: Personal Details */}
+                        <div className="space-y-2">
+                          <h4 className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Personal Identity</h4>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Name:</span> {formData.name}</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Age:</span> {formData.age} years</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Gender:</span> <span className="capitalize">{formData.gender}</span></p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Marital Status:</span> <span className="capitalize">{formData.maritalStatus}</span></p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Contact No:</span> {formData.contactNo}</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Address/Region:</span> {formData.address}</p>
+                        </div>
+
+                        {/* Column 2: Occupation & Schedule */}
+                        <div className="space-y-2">
+                          <h4 className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Routine & Habits</h4>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Occupation:</span> {formData.occupation}</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Sleep Schedule:</span> {formData.sleepSchedule || 'N/A'}</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Work Schedule:</span> {formData.workSchedule || 'N/A'}</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Addictions/Habits:</span> {formData.addictions || 'None'}</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Daily Water:</span> {formData.dailyWaterIntake} L</p>
+                        </div>
+
+                        {/* Column 3: Medical Profile */}
+                        <div className="space-y-2">
+                          <h4 className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Medical Profile</h4>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Height / Weight:</span> {formData.height}cm / {formData.weight}kg</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Physiol. Condition:</span> <span className="capitalize">{formData.physiologicalCondition}</span></p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Injury History:</span> <span className="capitalize">{formData.injuryHistory}</span></p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Surgical History:</span> {formData.surgicalHistory || 'None'}</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Medical History:</span> {formData.medicalHistory || 'None'}</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Hormonal Disturbance:</span> {formData.hormonalDisturbance || 'None'}</p>
+                        </div>
+
+                        {/* Column 4: Goal & Nutrition */}
+                        <div className="space-y-2">
+                          <h4 className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Goals & Preferences</h4>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Main Goal:</span> <span className="capitalize">{formData.goal.replace('_', ' ')}</span></p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Diet Preference:</span> <span className="capitalize">{formData.dietType}</span></p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Religious Preference:</span> <span className="capitalize">{formData.religiousPreference}</span></p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Eating Customs:</span> {formData.eatingCustoms || 'Standard'}</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Exercise Level:</span> <span className="capitalize">{formData.activityLevel}</span></p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Allergies/Intolerances:</span> {formData.allergies || 'None'}</p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Nutri. Deficiency:</span> <span>{formData.nutritionalDeficiency.split(',').map(x => x.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())).join(', ')}</span></p>
+                          <p><span className="font-semibold text-slate-600 dark:text-slate-400">Results Expected By:</span> {formData.resultsExpectedBy || 'N/A'}</p>
+                        </div>
+
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* PRINT-ONLY CASE HISTORY TABLE */}
+                <div className="hidden print:block space-y-4 break-inside-avoid">
+                  <h2 className="text-xl font-bold border-b pb-2 mb-4">Patient Assessment Case History</h2>
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-[11px] bg-white">
+                    <div><strong>Patient Name:</strong> {formData.name}</div>
+                    <div><strong>Age:</strong> {formData.age} years</div>
+                    <div><strong>Gender:</strong> <span className="capitalize">{formData.gender}</span></div>
+                    <div><strong>Contact Number:</strong> {formData.contactNo}</div>
+                    <div><strong>Address/Region:</strong> {formData.address}</div>
+                    <div><strong>Marital Status:</strong> <span className="capitalize">{formData.maritalStatus}</span></div>
+                    <div><strong>Occupation:</strong> {formData.occupation}</div>
+                    <div><strong>Sleep Schedule:</strong> {formData.sleepSchedule || 'Standard'}</div>
+                    <div><strong>Work Schedule:</strong> {formData.workSchedule || 'Standard'}</div>
+                    <div><strong>Addictions/Habits:</strong> {formData.addictions || 'None'}</div>
+                    <div><strong>Daily Water Intake:</strong> {formData.dailyWaterIntake} L</div>
+                    <div><strong>Height / Weight:</strong> {formData.height} cm / {formData.weight} kg</div>
+                    <div><strong>Physiological Condition:</strong> <span className="capitalize">{formData.physiologicalCondition}</span></div>
+                    <div><strong>Injury History:</strong> <span className="capitalize">{formData.injuryHistory}</span></div>
+                    <div><strong>Surgical History:</strong> {formData.surgicalHistory || 'None'}</div>
+                    <div><strong>Medical History:</strong> {formData.medicalHistory || 'None'}</div>
+                    <div><strong>Hormonal Disturbance:</strong> {formData.hormonalDisturbance || 'None'}</div>
+                    <div><strong>Allergies & Intolerances:</strong> {formData.allergies || 'None'}</div>
+                    <div><strong>Nutritional Deficiency:</strong> <span>{formData.nutritionalDeficiency.split(',').map(x => x.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())).join(', ')}</span></div>
+                    <div><strong>Main Goal:</strong> <span className="capitalize">{formData.goal.replace('_', ' ')}</span></div>
+                    <div><strong>Eating Customs:</strong> {formData.eatingCustoms || 'Standard'}</div>
+                    <div><strong>Religious Preference:</strong> <span className="capitalize">{formData.religiousPreference}</span></div>
+                    <div><strong>Expected Outcome:</strong> {formData.expectedOutcome || 'N/A'}</div>
+                    <div><strong>Results Expected By:</strong> {formData.resultsExpectedBy || 'N/A'}</div>
+                    <div><strong>Diet Preference:</strong> <span className="capitalize">{formData.dietType}</span></div>
+                    <div><strong>Exercise Schedule:</strong> {formData.exerciseSchedule || 'Standard'}</div>
+                  </div>
+                </div>
+
+                {/* Table search explorer directory */}
+                <div className="glass-card rounded-3xl p-6 border border-slate-200/50 no-print">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                      <h3 className="font-display font-extrabold text-xl text-slate-800 dark:text-white">Nutrition Directory Search</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Search specific food categories.</p>
+                    </div>
+                    <div className="flex gap-2">
+                      {['', 'breakfast', 'lunch', 'snacks'].map((categoryKey) => (
+                        <button
+                          key={categoryKey}
+                          onClick={() => setFoodCategory(categoryKey)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                            foodCategory === categoryKey 
+                            ? 'bg-slate-900 dark:bg-emerald-600 text-white' 
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
+                          }`}
+                        >
+                          {categoryKey === '' ? 'All' : categoryKey}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="max-h-[300px] overflow-y-auto border border-slate-200/40 dark:border-slate-800/40 rounded-2xl">
+                    <table className="w-full text-left border-collapse text-xs sm:text-sm">
+                      <thead className="sticky top-0 bg-slate-100 dark:bg-slate-900 font-bold text-slate-600 dark:text-slate-400 border-b border-slate-200/50 dark:border-slate-800/50">
+                        <tr>
+                          <th className="p-3">Food Item</th>
+                          <th className="p-3">Serving Size</th>
+                          <th className="p-3">Calories</th>
+                          <th className="p-3">Protein</th>
+                          <th className="p-3">Carbs</th>
+                          <th className="p-3">Fats</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200/40 dark:divide-slate-800/40">
+                        {foodsList.map((food, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/30 text-slate-700 dark:text-slate-300">
+                            <td className="p-3 font-semibold capitalize flex items-center gap-1.5">
+                              <span>{food.name}</span>
+                              <FoodTypeBadge isVeg={food.is_veg === 1} />
+                            </td>
+                            <td className="p-3 text-slate-400">{food.serving_size}</td>
+                            <td className="p-3 font-bold text-emerald-600 dark:text-emerald-400">{Math.round(food.calories)} kcal</td>
+                            <td className="p-3 font-bold text-blue-500">{food.protein}g</td>
+                            <td className="p-3 text-amber-500">{food.carbs}g</td>
+                            <td className="p-3 text-rose-500">{food.fats}g</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+          </div>
+
+          {/* CHATBOT */}
+          <div className="fixed bottom-6 right-6 z-50 no-print flex flex-col items-end">
+            {chatOpen && (
+              <div className="w-[340px] sm:w-[380px] h-[480px] rounded-3xl glass-card border border-slate-200/70 dark:border-slate-800/50 shadow-2xl flex flex-col overflow-hidden mb-3 animate-fade-in-up">
+                <div className="bg-gradient-to-r from-emerald-500 to-green-600 p-4 text-white flex justify-between items-center">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                      <Icon name="sparkles" className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-display font-extrabold text-sm leading-tight">Gyromotion NutriPlan Bot</h4>
+                      <p className="text-[10px] text-emerald-100 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-200 animate-ping" />
+                        Online &bull; Active Nutritionist
+                      </p>
+                    </div>
+                  </div>
+                  <button onClick={() => setChatOpen(false)} className="text-white/80 hover:text-white font-bold text-sm bg-white/10 rounded-lg w-7 h-7 flex items-center justify-center hover:bg-white/20">
+                    &times;
+                  </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {chatMessages.map((msg, i) => (
+                    <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] p-3 rounded-2xl text-xs leading-relaxed ${
+                        msg.sender === 'user'
+                        ? 'bg-emerald-500 text-white rounded-br-none shadow-sm'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-bl-none border border-slate-200/50 dark:border-slate-700/40'
+                      }`}>
+                        {msg.text.split('\n').map((para, idx) => (
+                          <p key={idx} className={idx > 0 ? 'mt-2' : ''}>{para}</p>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  {chatLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 p-3 rounded-2xl rounded-bl-none border border-slate-200/50 dark:border-slate-700/40">
+                        <Icon name="refresh-cw" className="animate-spin text-slate-400 w-3.5 h-3.5" />
+                      </div>
+                    </div>
+                  )}
+                  <div ref={chatEndRef} />
+                </div>
+
+                <form onSubmit={handleChatSubmit} className="p-3 border-t border-slate-200/40 dark:border-slate-800/40 bg-white/50 dark:bg-slate-900/50 flex gap-2">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder="Ask e.g. 'Can I eat Dosa for weight loss?'..."
+                    className="flex-1 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-800 dark:text-white outline-none focus:border-emerald-500"
+                  />
+                  <button type="submit" className="p-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow transition-colors flex items-center justify-center">
+                    <Icon name="send" className="w-3.5 h-3.5" />
+                  </button>
+                </form>
+              </div>
+            )}
+
+            <button onClick={() => setChatOpen(!chatOpen)} className="w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all duration-300">
+              <Icon name="sparkles" className="w-6 h-6" />
+            </button>
+          </div>
+
+          <footer className="w-full border-t border-slate-200/50 dark:border-slate-800/40 bg-white/20 dark:bg-slate-950/20 py-8 text-center text-xs text-slate-400 dark:text-slate-500 mt-16 no-print">
+            <p>&copy; 2026 Gyromotion NutriPlan. Designed under premium fitness standards. All rights reserved.</p>
+          </footer>
+
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
