@@ -509,7 +509,7 @@ export default function App() {
           <a href="https://gyromotionphysio.in/services.html" className="text-slate-600 dark:text-slate-300 font-semibold text-xs md:text-sm tracking-wide hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">SERVICES</a>
           <a href="https://gyromotionphysio.in/appointment.html" className="text-slate-600 dark:text-slate-300 font-semibold text-xs md:text-sm tracking-wide hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">BOOK AN APPOINTMENT</a>
           <a href="https://gyromotionphysio.in/pms/" className="text-slate-600 dark:text-slate-300 font-semibold text-xs md:text-sm tracking-wide hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">PMS</a>
-          <a href="https://gyromotion-nutriplan-ai.vercel.app" className="text-emerald-600 dark:text-emerald-400 font-bold text-xs md:text-sm tracking-wide">NUTRIPLAN AI</a>
+          <a href="https://gyromotion-nutriplan-ai.vercel.app" className="text-emerald-600 dark:text-emerald-400 font-bold text-xs md:text-sm tracking-wide">NutriPlan</a>
         </nav>
 
         <div className="w-full max-w-md p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-3xl shadow-2xl">
