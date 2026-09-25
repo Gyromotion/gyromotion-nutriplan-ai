@@ -535,14 +535,23 @@ export default function App() {
       {/* NAVBAR */}
       <nav className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/50 dark:border-slate-800/50 transition-all duration-300 no-print">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-500/20">
-              <Flame size={22} className="animate-pulse" />
+          <div className="flex items-center space-x-4 md:space-x-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 flex items-center justify-center">
+                <img src="/images/gyromotion-logo.png" alt="Gyromotion Logo" className="w-full h-full object-contain filter drop-shadow-sm" />
+              </div>
+              <div>
+                <span className="font-display font-extrabold text-xl tracking-tight text-slate-800 dark:text-white">
+                  Gyromotion <span className="bg-gradient-to-r from-emerald-500 to-green-600 bg-clip-text text-transparent">NutriPlan</span>
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="font-display font-extrabold text-xl tracking-tight text-slate-800 dark:text-white">
-                Gyromotion <span className="bg-gradient-to-r from-emerald-500 to-green-600 bg-clip-text text-transparent">NutriPlan</span>
-              </span>
+            
+            <div className="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-600 dark:text-slate-300">
+              <a href="https://gyromotionphysio.in/#home" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Home</a>
+              <a href="https://gyromotionphysio.in/#about" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">About</a>
+              <a href="https://gyromotionphysio.in/#services" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Services</a>
+              <a href="https://gyromotionphysio.in/#appointment" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Book Appointment</a>
             </div>
           </div>
 
@@ -576,10 +585,7 @@ export default function App() {
             
             {/* HERO SECTION */}
             <div className="text-center max-w-3xl mx-auto space-y-6">
-              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-100/80 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold tracking-wide">
-                <Sparkles size={13} className="text-emerald-500 animate-spin" />
-                <span>100% Free - No Sign Up Required</span>
-              </div>
+
               <h1 className="font-display font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight text-slate-900 dark:text-white leading-[1.1]">
                 Personalized Indian Diet Planner <br />
                 <span className="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 bg-clip-text text-transparent">
