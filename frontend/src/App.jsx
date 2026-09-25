@@ -500,7 +500,18 @@ export default function App() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/30">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/30">
+        
+        {/* Navigation Bar */}
+        <nav className="absolute top-0 w-full px-8 py-5 flex justify-center gap-6 md:gap-10 flex-wrap bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border-b border-slate-200/50 dark:border-slate-800/50">
+          <a href="https://gyromotionphysio.in/" className="text-slate-600 dark:text-slate-300 font-semibold text-xs md:text-sm tracking-wide hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">HOME</a>
+          <a href="https://gyromotionphysio.in/about.html" className="text-slate-600 dark:text-slate-300 font-semibold text-xs md:text-sm tracking-wide hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">ABOUT</a>
+          <a href="https://gyromotionphysio.in/services.html" className="text-slate-600 dark:text-slate-300 font-semibold text-xs md:text-sm tracking-wide hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">SERVICES</a>
+          <a href="https://gyromotionphysio.in/appointment.html" className="text-slate-600 dark:text-slate-300 font-semibold text-xs md:text-sm tracking-wide hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">BOOK AN APPOINTMENT</a>
+          <a href="https://gyromotionphysio.in/pms/" className="text-slate-600 dark:text-slate-300 font-semibold text-xs md:text-sm tracking-wide hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">PMS</a>
+          <a href="https://gyromotion-nutriplan-ai.vercel.app" className="text-emerald-600 dark:text-emerald-400 font-bold text-xs md:text-sm tracking-wide">NUTRIPLAN AI</a>
+        </nav>
+
         <div className="w-full max-w-md p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-white/20 dark:border-slate-700/50 rounded-3xl shadow-2xl">
           <div className="flex flex-col items-center justify-center gap-4 mb-8">
             <div className="w-40 flex items-center justify-center">
