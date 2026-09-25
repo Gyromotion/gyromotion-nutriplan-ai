@@ -548,10 +548,11 @@ export default function App() {
             </div>
             
             <div className="hidden md:flex items-center space-x-6 text-sm font-semibold text-slate-600 dark:text-slate-300">
-              <a href="https://gyromotionphysio.in/#home" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Home</a>
-              <a href="https://gyromotionphysio.in/#about" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">About</a>
-              <a href="https://gyromotionphysio.in/#services" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Services</a>
-              <a href="https://gyromotionphysio.in/#appointment" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Book Appointment</a>
+              <a href="https://gyromotionphysio.in/" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">HOME</a>
+              <a href="https://gyromotionphysio.in/about.html" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">ABOUT</a>
+              <a href="https://gyromotionphysio.in/services.html" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">SERVICES</a>
+              <a href="https://gyromotionphysio.in/appointment.html" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">BOOK AN APPOINTMENT</a>
+              <a href="https://gyromotionphysio.in/pms/" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">PMS</a>
             </div>
           </div>
 
